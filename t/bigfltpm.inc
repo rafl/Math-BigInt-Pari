@@ -1,6 +1,6 @@
 #include this file into another test for subclass testing...
 
-ok ($class->_core_lib(),$CL);
+ok ($class->config()->{lib},$CL);
 
 while (<DATA>)
   {
@@ -55,11 +55,11 @@ while (<DATA>)
         $try .= "\$x->numify();";
       } elsif ($f eq "length") {
         $try .= "\$x->length();";
-      # some unary ops (test the bxxx form, since that is done by AUTOLOAD)
+      # some unary ops (test the fxxx form, since that is done by AUTOLOAD)
       } elsif ($f =~ /^f(nan|sstr|neg|floor|ceil|abs)$/) {
         $try .= "\$x->f$1();";
       # some is_xxx test function	
-      } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan)$/) {
+      } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan|int)$/) {
         $try .= "\$x->$f();";
       } elsif ($f eq "as_number") {
         $try .= '$x->as_number();';
@@ -73,6 +73,8 @@ while (<DATA>)
         $try .= "$setup; \$x->ffround($args[1]);";
       } elsif ($f eq "fsqrt") {
         $try .= "$setup; \$x->fsqrt();";
+      } elsif ($f eq "flog") {
+        $try .= "$setup; \$x->flog();";
       } elsif ($f eq "ffac") {
         $try .= "$setup; \$x->ffac();";
       }
@@ -81,8 +83,6 @@ while (<DATA>)
       $try .= "\$y = new $class \"$args[1]\";";
       if ($f eq "fcmp") {
         $try .= '$x <=> $y;';
-      } elsif ($f eq "flog") {
-        $try .= '$x->flog($y);';
       } elsif ($f eq "facmp") {
         $try .= '$x->facmp($y);';
       } elsif ($f eq "fpow") {
@@ -188,19 +188,31 @@ sub ok_undef
   }
 
 __DATA__
-#&flog
-#$div_scale = 14;
-#10:0:2.30258509299405
+$div_scale = 40;
+&flog
+0:NaN
+-1:NaN
+-2:NaN
+1:0
+# this is too slow for the testsuite
+#2.718281828:0.9999999998311266953289851340574956564911
+#$div_scale = 20;
+#2.718281828:0.99999999983112669533
+1:0
+# too slow, too (or hangs?)
+#123:4.8112184355
+# $div_scale = 14;
+#10:0:2.302585092994
 #1000:0:6.90775527898214
 #100:0:4.60517018598809
 #2:0:0.693147180559945
 #3.1415:0:1.14470039286086
 #12345:0:9.42100640177928
 #0.001:0:-6.90775527898214
-## reset for further tests
-#$div_scale = 40;
+# reset for further tests
+$div_scale = 40;
 &frsft
-#NaNfrsft:NaN
+NaNfrsft:2:NaN
 0:2:0
 1:1:0.5
 2:1:1
@@ -208,7 +220,7 @@ __DATA__
 123:1:61.5
 32:3:4
 &flsft
-#NaNflsft:NaN
+NaNflsft:0:NaN
 2:1:4
 4:3:32
 5:3:40
@@ -980,10 +992,10 @@ inf:-5:0
 -inf:-5:0
 5:5:0
 -5:-5:0
-inf:inf:0
--inf:-inf:0
--inf:inf:0
-inf:-inf:0
+inf:inf:NaN
+-inf:-inf:NaN
+-inf:inf:NaN
+inf:-inf:NaN
 8:0:8
 inf:0:inf
 # exceptions to reminder rule
@@ -1116,6 +1128,18 @@ abc:0
 123.45:0
 -123.45:0
 2:0
+&is_int
+NaNis_int:0
+0:1
+1:1
+2:1
+-2:1
+-1:1
+-inf:0
++inf:0
+123.4567:0
+-0.1:0
+-0.002:0
 &is_even
 abc:0
 0:1
@@ -1130,6 +1154,11 @@ abc:0
 -inf:0
 123.456:0
 -123.456:0
+0.01:0
+-0.01:0
+120:1
+1200:1
+-1200:1
 &is_positive
 0:1
 1:1

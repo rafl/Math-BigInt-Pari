@@ -1,5 +1,12 @@
 Revision history for Math::BigInt::Pari
 
+2002-02-21 v1.07 Tels
+ - Math::Pari has _hex_cvt(), which makes from_hex() fast, but doesn't have
+   something for from_bin(). Now _from_bin() repacks the input as hex number
+   and then passes it to _hex_cvt().
+ - tests from Math::BigInt v1.51
+ - replaced _core_lib() by config()->{lib}
+
 2002-02-10 v1.06 Tels
  - _lsft() and _rsft() do now bases != 2, too
  - tests are now from v1.50

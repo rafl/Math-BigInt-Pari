@@ -34,7 +34,7 @@ sub _swap
 ##############################################################################
 package main;
 
-my $CALC = $class->_core_lib(); ok ($CALC,$CL);
+my $CALC = $class->config()->{lib}; ok ($CALC,$CL);
 
 my ($f,$z,$a,$exp,@a,$m,$e,$round_mode,$expected_class);
 
@@ -62,7 +62,7 @@ while (<DATA>)
     {
     $try = "\$x = $class->bnorm(\"$args[0]\");";
   # some is_xxx tests
-   } elsif ($f =~ /^is_(zero|one|odd|even|negative|positive|nan)$/) {
+   } elsif ($f =~ /^is_(zero|one|odd|even|negative|positive|nan|int)$/) {
     $try .= "\$x->$f();";
    } elsif ($f eq "as_hex") {
     $try .= '$x->as_hex();';
@@ -568,6 +568,13 @@ NaNneg:0
 +inf:1
 -inf:0
 NaNneg:0
+&is_int
+-inf:0
++inf:0
+NaNis_int:0
+1:1
+0:1
+123e12:1
 &is_odd
 abc:0
 0:0
@@ -578,6 +585,8 @@ abc:0
 10000001:1
 10000002:0
 2:0
+120:0
+121:1
 &is_even
 abc:0
 0:1
@@ -588,6 +597,8 @@ abc:0
 10000001:0
 10000002:1
 2:1
+120:1
+121:0
 &bacmp
 +0:-0:0
 +0:+1:-1
@@ -971,8 +982,8 @@ abc:NaN
 abc:abc:NaN
 abc:0:NaN
 +0:abc:NaN
-+inf:-inf:0
--inf:+inf:0
++inf:-inf:NaN
+-inf:+inf:NaN
 +inf:+inf:inf
 -inf:-inf:-inf
 baddNaN:+inf:NaN
@@ -1019,8 +1030,8 @@ abc:+0:NaN
 +0:abc:NaN
 +inf:-inf:inf
 -inf:+inf:-inf
-+inf:+inf:0
--inf:-inf:0
++inf:+inf:NaN
+-inf:-inf:NaN
 +0:+0:0
 +1:+0:1
 +0:+1:-1
@@ -1143,10 +1154,10 @@ inf:-5:-inf,0
 -inf:-5:inf,0
 5:5:1,0
 -5:-5:1,0
-inf:inf:1,0
--inf:-inf:1,0
--inf:inf:-1,0
-inf:-inf:-1,0
+inf:inf:NaN,NaN
+-inf:-inf:NaN,NaN
+-inf:inf:NaN,NaN
+inf:-inf:NaN,NaN
 8:0:inf,8
 inf:0:inf,inf
 # exceptions to reminder rule
@@ -1171,10 +1182,10 @@ inf:-5:-inf
 -inf:-5:inf
 5:5:1
 -5:-5:1
-inf:inf:1
--inf:-inf:1
--inf:inf:-1
-inf:-inf:-1
+inf:inf:NaN
+-inf:-inf:NaN
+-inf:inf:NaN
+inf:-inf:NaN
 8:0:inf
 inf:0:inf
 -8:0:-inf
@@ -1246,10 +1257,10 @@ inf:-5:0
 -inf:-5:0
 5:5:0
 -5:-5:0
-inf:inf:0
--inf:-inf:0
--inf:inf:0
-inf:-inf:0
+inf:inf:NaN
+-inf:-inf:NaN
+-inf:inf:NaN
+inf:-inf:NaN
 8:0:8
 inf:0:inf
 # exceptions to reminder rule

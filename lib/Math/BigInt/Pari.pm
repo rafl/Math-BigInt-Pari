@@ -2,7 +2,7 @@ package Math::BigInt::Pari;
 use strict;
 
 use vars qw( @ISA @EXPORT $VERSION );
-$VERSION = '1.06';
+$VERSION = '1.07';
 
 use Math::Pari qw(PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd ifact);
 
@@ -13,10 +13,20 @@ sub _new { PARI(${ $_[1] }) }
 
 sub _from_hex {
     my $h = $_[1];
-    $$h =~ s/^[+-]//;
-    $$h = "0x$$h" unless $$h =~ /^0x/;
-    Math::Pari::_hex_cvt("$$h");
+    $$h =~ s/^[+-]//;				# remove sign
+    $$h = "0x$$h" unless $$h =~ /^0x/;		# make sure it starts with 0x
+    Math::Pari::_hex_cvt($$h);
 }
+
+sub _from_bin
+  {
+  my $b = $_[1];
+  $$b =~ s/^[+-]?0b//;					# remove sign and 0b
+  my $l = length($$b);					# bits
+  $$b = '0' x (8-($l % 8)) . $$b if ($l % 8) != 0;	# padd left side w/ 0
+  my $h = unpack('H*', pack ('B*', $$b));		# repack as hex
+  Math::Pari::_hex_cvt('0x' . $h);			# can handle it now
+  }
 
 sub _as_hex {
     my $v = unpack('H*', _mp2os($_[1]));
