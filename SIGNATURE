@@ -1,39 +1,38 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.36.
+signed via the Module::Signature module, version 0.42.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
 
     % cpansign -v
 
-It would check each file's integrity, as well as the signature's
+It will check each file's integrity, as well as the signature's
 validity.  If "==> Signature verified OK! <==" is not displayed,
 the distribution may already have been compromised, and you should
 not run its Makefile.PL or Build.PL.
 
 -----BEGIN PGP SIGNED MESSAGE-----
 
-SHA1 b8a884499f1848c60b6723adf05372f46996710c CHANGES
+SHA1 769fa4d514c3b1989cba0dc1d3ea8d2981e17c39 CHANGES
 SHA1 388908c86dbd5fe9c763e74c015e683ab062adc9 MANIFEST
-SHA1 1d24cbecc6e347ca73f85cb2c2fbf264fa9840d9 META.yml
-SHA1 0277facb4cbc86987fdb3826d9ff09a208d97f53 Makefile.PL
-SHA1 82dffff26c88062662bbc7604884af776cc5b980 NEW
-SHA1 e992a3d47fc2d959485d8f45dd304823dfef9cbd README
-SHA1 c3be90a3ec3f86f548b15436fa4d55d496650546 lib/Math/BigInt/Pari.pm
-SHA1 405dba0119ac22f5faaea780b14c7659a14421fd t/bigfltpm.inc
-SHA1 ff40aa30efdfde5b282abc7bdc88f48282ec102a t/bigfltpm.t
-SHA1 7b53d2e3ca40ab342071f65949f8e3ddc8982129 t/bigintpari.t
-SHA1 24a9b7395ffc8f73873813c7732fb5711d45f30f t/bigintpm.inc
-SHA1 ba49dc7ce013d6570a9399e12ca3eb8a7a8e8fb6 t/bigintpm.t
+SHA1 c082d2b2c54ce3e129da489b9f7bb303b3a44620 META.yml
+SHA1 d1e0368be273f2a2f9f0dd0d20e3f056a37e7b22 Makefile.PL
+SHA1 914ce56d39b58fcf8703b6e9895d980c44c796e5 NEW
+SHA1 99b736157d6c30930d844e192337598cbf924562 README
+SHA1 834bc6962757d6d036469c6c6127aa9ee0b6a1d7 lib/Math/BigInt/Pari.pm
+SHA1 f7a70b80cf54382eaae41f0e7a15394d68853eb9 t/bigfltpm.inc
+SHA1 d865f82019ee727d6753899a066dd605e7c9ed47 t/bigfltpm.t
+SHA1 8c8ff3317beaa3f8bc684b4ad71ec6ac8ad471aa t/bigintpari.t
+SHA1 631142ae4b92f7187bc526ccd7a83a8459582e65 t/bigintpm.inc
+SHA1 fd20f1ae03e05046b6f9674b847c7b76f21b34d2 t/bigintpm.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.2.2-rc1-SuSE (GNU/Linux)
-Comment: When cryptography is outlawed, bayl bhgynjf jvyy unir cevinpl.
+Version: GnuPG v1.2.4 (GNU/Linux)
 
-iQEVAwUBP/2k63cLPEOTuEwVAQErGwf+JOt92QZYC+QOFlcw/tzi0aM7CqWTGS6t
-cQNKGA1rH9FKKd3qvYV2JWuGhiEPVQLzsDp4Jm5YK/R2/kd7I226f5TafmcGa2gn
-gYOQGXH0EKD/1wMuePtxXJAi3Fa5iH25p4Tiz2SvY8wonwH35xsnd0LwyTiYto47
-hUPnmPvJ5pEgxWlqoq38nx5Hp3DrCFW/ecMF+xxoCRGknnZrqRjtkQD3qv+affln
-B8d2Q7ZgvEr5SBqKdwRbdxce+1eGQjB1lHdZDY2pXR1jvRToHw5HZ0yYiGCOlaB4
-xJs93Nu+iAnoD/Tl+IGIR7kiwvyC9DIoiHwg0EzozESp/Z4PQJ4TFw==
-=Rias
+iQEVAwUBQdgWb3cLPEOTuEwVAQGWvQf+LRZGwyZIidg8xxUJ+Kpi2F94w0r2x+mM
+31HMijrkSewtNaDfSkXurymnS+77gDixzs/eyA0YDtHqauSYjteO6IPixL7eTZHM
+gTIl7p5evLk5L8t/RQfYMcd+znSV/FVMEv282bRTuQ93LVYWAnCbP2iwxoP8cBTH
+otk+ozRkbD2W41rWxQj62chxw5efEJx62qqnKMlBosr02lrG5rs8HnTfZckcM1T8
+VVruFPRFzlYWRbaaZYyQ80IixYRVbDmWS8BKrIVBZ2D4pmLDdEecjeLy5C5utKZW
+q61u9WoOz7ahri1WKRVCPPjr3xtAFtqFPC4WcORFLt8hoG9BK+RVkA==
+=rUCt
 -----END PGP SIGNATURE-----

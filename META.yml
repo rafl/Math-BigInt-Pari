@@ -1,13 +1,12 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Math-BigInt-Pari
-version:      1.10
+--- #YAML:1.0
+name: Math-BigInt-Pari
+version: 1.11
 version_from: lib/Math/BigInt/Pari.pm
-installdirs:  site
-requires:
-    Math::BigFloat:                1.42
-    Math::BigInt:                  1.68
-    Math::Pari:                    2.001804
-
+license: perl
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+generated_by: Math-BigInt-Pari version 1.11
+installdirs: site
+requires:
+  Math::BigFloat: 1.48
+  Math::BigInt: 1.74
+  Math::Pari: 2.010602

@@ -1,5 +1,11 @@
 Revision history for Math::BigInt::Pari
 
+2005-01-02 v1.11 Tels 5055 tests
+ * require Math::BigInt v1.74 and Math::Pari v2.010602
+ * testsuite from MBI v1.74
+ * support API from BigInt v1.70 and better
+ * add _is_two, _is_ten, _two, _ten, _log_int, _zeros, _sqrt, _root() etc
+
 2004-01-07 v1.10 Tels
  * testsuite from MBI v1.68 - 4583 tests
  * _as_hex() and _as_bin() handle zero, tests for that
