@@ -8,10 +8,10 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 53;
+  plan tests => 56;
   }
 
-# testing of Math::BigInt::BitVect, primarily for interface/api and not for the
+# testing of Math::BigInt::Pari, primarily for interface/api and not for the
 # math functionality
 
 use Math::BigInt::Pari;
@@ -99,9 +99,15 @@ foreach (qw/
 # _num
 $x = _new($C,\"12345"); $x = _num($C,$x); ok (ref($x)||'',''); ok ($x,12345);
 
-# no _gcd in PARI
-#$x = _new($C,\"128"); $y = _new($C,\'96'); $x = _gcd($x,$y); ok (${_str($C,$x)},'32');
-#
+# _copy
+$x = _new($C,\"123"); $y = _copy($C,$x); $z = _new($C,\"321");
+_add($C,$x,$z);
+ok (${_str($C,$x)},'444');
+ok (${_str($C,$y)},'123');
+
+# _gcd
+$x = _new($C,\"128"); $y = _new($C,\'96'); $x = _gcd($C,$x,$y);
+ok (${_str($C,$x)},'32');
 
 # should not happen:
 # $x = _new($C,\"-2"); $y = _new($C,\"4"); ok (_acmp($C,$x,$y),-1);

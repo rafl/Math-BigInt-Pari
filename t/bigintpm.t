@@ -8,9 +8,9 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 1246;
+  plan tests => 1414;
   }
-my $version = '1.37';	# for $VERSION tests, match current release (by hand!)
+my $version = '1.39';	# for $VERSION tests, match current release (by hand!)
 
 ##############################################################################
 # for testing inheritance of _swap
@@ -79,6 +79,10 @@ while (<DATA>)
       $try .= '$x->is_odd()+0;';
     } elsif ($f eq "is_even") {
       $try .= '$x->is_even()+0;';
+    } elsif ($f eq "is_negative") {
+      $try .= '$x->is_negative()+0;';
+    } elsif ($f eq "is_positive") {
+      $try .= '$x->is_positive()+0;';
     } elsif ($f eq "is_inf") {
       $try .= "\$x->is_inf('$args[1]')+0;";
     } elsif ($f eq "binf") {
@@ -94,9 +98,9 @@ while (<DATA>)
     } elsif ($f eq "bsstr") {
       $try .= '$x->bsstr();';
     } elsif ($f eq "bneg") {
-      $try .= '-$x;';
+      $try .= '$x->bneg();';
     } elsif ($f eq "babs") {
-      $try .= 'abs $x;';
+      $try .= '$x->babs();';
     } elsif ($f eq "binc") {
       $try .= '++$x;'; 
     } elsif ($f eq "bdec") {
@@ -132,6 +136,8 @@ while (<DATA>)
         $try .= "\$x * \$y;";
       }elsif ($f eq "bdiv"){
         $try .= "\$x / \$y;";
+      }elsif ($f eq "bdiv-list"){
+        $try .= 'join (",",$x->bdiv($y));';
       }elsif ($f eq "bmod"){
         $try .= "\$x % \$y;";
       }elsif ($f eq "bgcd")
@@ -214,28 +220,6 @@ $try = "use Math::BigInt ($version,'babs',':constant');";
 $try .= ' $x = 2**150; babs($x); $x = "$x";';
 $ans1 = eval $try;
 ok ( $ans1, "1427247692705959881058285969449495136382746624");
-
-# test wether Math::BigInt::Small via use works (w/ dff. spellings of calc)
-#$try = "use Math::BigInt ($version,'lib','Small');";
-#$try .= ' $x = 2**10; $x = "$x";';
-#$ans1 = eval $try;
-#ok ( $ans1, "1024");
-#$try = "use Math::BigInt ($version,'LiB','Math::BigInt::Small');";
-#$try .= ' $x = 2**10; $x = "$x";';
-#$ans1 = eval $try;
-#ok ( $ans1, "1024");
-# test wether calc => undef (array element not existing) works
-#$try = "use Math::BigInt ($version,'LIB');";
-#$try = "require Math::BigInt; Math::BigInt::import($version,'CALC');";
-#$try .= ' $x = Math::BigInt->new(2)**10; $x = "$x";';
-#$ans1 = eval $try;
-#ok ( $ans1, 1024);
-
-# test whether fallback to calc works
-#$try = "use Math::BigInt ($version,'lib','foo, bar , ');";
-#$try .= ' Math::BigInt::_core_lib();';
-#$ans1 = eval $try;
-#ok ( $ans1, "Math::BigInt::Calc");
 
 # test some more
 @a = ();
@@ -361,18 +345,6 @@ print "# For '$try'\n" if (!ok "$ans" , "ok" );
 $x = Math::BigInt->new(99999); is_valid($x);
 $x += 1; ok ($x,100000); is_valid($x); 
 $x -= 1; ok ($x,99999); is_valid($x); 
-
-###############################################################################
-# check numify, these tests only make sense with Math::BigInt::Calc, since
-# only this uses $BASE
-
-my $BASE = int(1e5);		# should access Math::BigInt::Calc::BASE
-$x = Math::BigInt->new($BASE-1);     ok ($x->numify(),$BASE-1); 
-$x = Math::BigInt->new(-($BASE-1));  ok ($x->numify(),-($BASE-1)); 
-$x = Math::BigInt->new($BASE);       ok ($x->numify(),$BASE); 
-$x = Math::BigInt->new(-$BASE);      ok ($x->numify(),-$BASE);
-$x = Math::BigInt->new( -($BASE*$BASE*1+$BASE*1+1) ); 
-ok($x->numify(),-($BASE*$BASE*1+$BASE*1+1)); 
 
 ###############################################################################
 # test bug in _digits with length($c[-1]) where $c[-1] was "00001" instead of 1
@@ -529,6 +501,20 @@ sub is_valid
   }
 
 __END__
+&is_negative
+0:0
+-1:1
+1:0
++inf:0
+-inf:1
+NaNneg:0
+&is_positive
+0:1
+-1:0
+1:1
++inf:1
+-inf:0
+NaNneg:0
 &is_odd
 abc:0
 0:0
@@ -561,6 +547,24 @@ abc:0
 +987654321:+123456789:1
 -987654321:+123456789:1
 -123:+4567889:-1
+# NaNs
+acmpNaN:123:
+123:acmpNaN:
+acmpNaN:acmpNaN:
+# infinity
++inf:+inf:0
+-inf:-inf:0
++inf:-inf:0
+-inf:+inf:0
++inf:123:1
+-inf:123:1
++inf:-123:1
+-inf:-123:1
+# return undef
++inf:NaN:
+NaN:+inf:
+-inf:NaN:
+NaN:-inf:
 &bnorm
 123:123
 # binary input
@@ -574,6 +578,8 @@ abc:0
 0b011:3
 0b101:5
 0b1000000000000000000000000000000:1073741824
+0b_101:NaN
+0b1_0_1:5
 # hex input
 -0x0:0
 0xabcdefgh:NaN
@@ -582,8 +588,10 @@ abc:0
 -0xABCDEF:-11259375
 -0x1234:-4660
 0x12345678:305419896
+0x1_2_3_4_56_78:305419896
+0x_123:NaN
 # inf input
-+inf:+inf
++inf:inf
 -inf:-inf
 0inf:NaN
 # normal input
@@ -634,6 +642,7 @@ E23:NaN
 -1010E-2:NaN
 -1.01E+1:NaN
 -1.01E-1:NaN
+1234.00:1234
 &bnan
 1:NaN
 2:NaN
@@ -646,9 +655,9 @@ boneNaN:+:+1
 2:abc:+1
 3::+1
 &binf
-1:+:+inf
+1:+:inf
 2:-:-inf
-3:abc:+inf
+3:abc:inf
 &is_inf
 +inf::1
 -inf::1
@@ -701,6 +710,9 @@ abc:abc:NaN
 100:1e+2
 abc:NaN
 &bneg
+bnegNaN:NaN
++inf:-inf
+-inf:inf
 abd:NaN
 +0:+0
 +1:-1
@@ -708,16 +720,18 @@ abd:NaN
 +123456789:-123456789
 -123456789:+123456789
 &babs
-abc:NaN
+babsNaN:NaN
++inf:inf
+-inf:inf
 +0:+0
 +1:+1
 -1:+1
 +123456789:+123456789
 -123456789:+123456789
 &bcmp
-abc:abc:
-abc:+0:
-+0:abc:
+bcmpNaN:bcmpNaN:
+bcmpNaN:+0:
++0:bcmpNaN:
 +0:+0:0
 -1:+0:-1
 +0:-1:1
@@ -747,6 +761,8 @@ abc:+0:
 +inf:-5432112345:1
 +inf:+inf:0
 -inf:-inf:0
++inf:-inf:1
+-inf:+inf:-1
 # return undef
 +inf:NaN:
 NaN:+inf:
@@ -754,11 +770,15 @@ NaN:+inf:
 NaN:-inf:
 &binc
 abc:NaN
++inf:inf
+-inf:-inf
 +0:+1
 +1:+2
 -1:+0
 &bdec
 abc:NaN
++inf:inf
+-inf:-inf
 +0:-1
 +1:+0
 -1:-2
@@ -766,6 +786,14 @@ abc:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
++inf:-inf:0
+-inf:+inf:0
++inf:+inf:inf
+-inf:-inf:-inf
+baddNaN:+inf:NaN
+baddNaN:+inf:NaN
++inf:baddNaN:NaN
+-inf:baddNaN:NaN
 +0:+0:+0
 +1:+0:+1
 +0:+1:+1
@@ -804,6 +832,10 @@ abc:+0:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
++inf:-inf:inf
+-inf:+inf:-inf
++inf:+inf:0
+-inf:-inf:0
 +0:+0:+0
 +1:+0:+1
 +0:+1:-1
@@ -842,6 +874,14 @@ abc:+0:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
+NaNmul:+inf:NaN
+NaNmul:-inf:NaN
+-inf:NaNmul:NaN
++inf:NaNmul:NaN
++inf:+inf:inf
++inf:-inf:-inf
+-inf:+inf:-inf
+-inf:-inf:inf
 +0:+0:+0
 +0:+1:+0
 +1:+0:+0
@@ -874,14 +914,20 @@ abc:+0:NaN
 +25:+25:+625
 +12345:+12345:+152399025
 +99999:+11111:+1111088889
+&bdiv-list
+100:20:5,0
+4095:4095:1,0
+-4095:-4095:1,0
+4095:-4095:-1,0
+-4095:4095:-1,0
 &bdiv
 abc:abc:NaN
 abc:+1:abc:NaN
 +1:abc:NaN
 +0:+0:NaN
-+5:0:+inf
++5:0:inf
 -5:0:-inf
-+1:+0:+inf
++1:+0:inf
 +0:+1:+0
 +0:-1:+0
 -1:+0:-inf
@@ -923,6 +969,8 @@ abc:+1:abc:NaN
 1:-3:-1
 -5:3:-2
 4:-3:-2
+123:+inf:0
+123:-inf:0
 &bmod
 abc:abc:NaN
 abc:+1:abc:NaN
@@ -971,6 +1019,7 @@ abc:+1:abc:NaN
 -2:-3:-2
 4:-3:-2
 1:-3:-2
+4095:4095:0
 &bgcd
 abc:abc:NaN
 abc:+0:NaN
@@ -1006,6 +1055,12 @@ abc:0:NaN
 +281474976710656:+0:+0
 +281474976710656:+1:+0
 +281474976710656:+281474976710656:+281474976710656
+-2:-3:-4
+-1:-1:-1
+-6:-6:-6
+-7:-4:-8
+-7:4:0
+-4:7:4
 &bior
 abc:abc:NaN
 abc:0:NaN
@@ -1015,6 +1070,11 @@ abc:0:NaN
 +281474976710656:+0:+281474976710656
 +281474976710656:+1:+281474976710657
 +281474976710656:+281474976710656:+281474976710656
+-2:-3:-1
+-1:-1:-1
+-6:-6:-6
+-7:4:-3
+-4:7:-1
 &bxor
 abc:abc:NaN
 abc:0:NaN
@@ -1024,11 +1084,20 @@ abc:0:NaN
 +281474976710656:+0:+281474976710656
 +281474976710656:+1:+281474976710657
 +281474976710656:+281474976710656:+0
+-2:-3:3
+-1:-1:0
+-6:-6:0
+-7:4:-3
+-4:7:-5
+4:-7:-3
 &bnot
 abc:NaN
 +0:-1
 +8:-9
 +281474976710656:-281474976710657
+-1:0
+-2:1
+-12:11
 &digit
 0:0:0
 12:0:2
@@ -1098,9 +1167,9 @@ abc:12:NaN
 -2:-1:NaN
 2:-2:NaN
 -2:-2:NaN
-+inf:1234500012:+inf
++inf:1234500012:inf
 -inf:1234500012:-inf
-+inf:-12345000123:+inf
++inf:-12345000123:inf
 -inf:-12345000123:-inf
 # 1 ** -x => 1 / (1 ** x)
 -1:0:1
@@ -1147,6 +1216,10 @@ abc:12:NaN
 Nan:NaN
 &bround
 $round_mode('trunc')
+0:12:0
+NaNbround:12:NaN
++inf:12:inf
+-inf:12:-inf
 1234:0:1234
 1234:2:1200
 123456:4:123400
@@ -1224,11 +1297,16 @@ $round_mode('even')
 &is_zero
 0:1
 NaNzero:0
++inf:0
+-inf:0
 123:0
 -1:0
 1:0
 &is_one
 0:0
+NaNone:0
++inf:0
+-inf:0
 1:1
 2:0
 -1:0
@@ -1236,12 +1314,18 @@ NaNzero:0
 # floor and ceil tests are pretty pointless in integer space...but play safe
 &bfloor
 0:0
+NaNfloor:NaN
++inf:inf
+-inf:-inf
 -1:-1
 -2:-2
 2:2
 3:3
 abc:NaN
 &bceil
+NaNceil:NaN
++inf:inf
+-inf:-inf
 0:0
 -1:-1
 -2:-2

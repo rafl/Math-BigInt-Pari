@@ -2,7 +2,7 @@ package Math::BigInt::Pari;
 use strict;
 
 use vars qw( @ISA @EXPORT $VERSION );
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -17,14 +17,12 @@ require Exporter;
         _check _zero _one _copy _len
         _pow _dec _inc
         _and _or _xor
+        _gcd
 );
 
-use Math::Pari qw( PARI pari2pv gdivent );
+use Math::Pari qw( PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd );
 
-my $zero_ = PARI(0);
-my $one_ = PARI(1);
-
-sub _new { PARI(${ $_[1] }); }
+sub _new { PARI(${ $_[1] }) }
 
 sub _from_hex {
     my $h = $_[1];
@@ -36,13 +34,13 @@ sub _from_hex {
 sub _zero { PARI(0) }
 sub _one  { PARI(1) }
 
-sub _copy { PARI("$_[1]"); }
+sub _copy { $_[1] + 0 }
 
-sub _str { my $x = pari2pv($_[1]); \$x; }
+sub _str { my $x = pari2pv($_[1]); \$x }
 
 sub _num { pari2pv($_[1]) }
 
-sub _add { $_[1] += $_[2]; }
+sub _add { $_[1] += $_[2] }
 
 sub _sub {
     if ($_[3]) {
@@ -52,7 +50,7 @@ sub _sub {
     }
 }
 
-sub _mul { $_[1] *= $_[2]; }
+sub _mul { $_[1] *= $_[2] }
 
 sub _div {
     if (wantarray)
@@ -68,32 +66,33 @@ sub _div {
   $_[1];
 }
 
-sub _inc { $_[1]++; }
+sub _inc { $_[1]++ }
 
-sub _dec { $_[1]--; }
+sub _dec { $_[1]-- }
 
-sub _and { $_[1] &= $_[2]; }
+sub _and { $_[1] &= $_[2] }
 
-sub _xor { $_[1] ^= $_[2]; }
+sub _xor { $_[1] ^= $_[2] }
 
-sub _or { $_[1] |= $_[2]; }
+sub _or { $_[1] |= $_[2] }
 
-sub _pow { $_[1] **= $_[2]; }
+sub _pow { $_[1] **= $_[2] }
 
-sub _len { length(pari2pv($_[1]));
-}
+sub _gcd { gcd($_[1], $_[2]) }
 
-sub _digit { substr(pari2pv($_[1]), -($_[2]+1), 1); }
+sub _len { length(pari2pv($_[1])) }
 
-sub _is_zero { $_[1] == $zero_; }
+sub _digit { substr(pari2pv($_[1]), -($_[2]+1), 1) }
 
-sub _is_one { $_[1] == $one_; }
+sub _is_zero { gcmp0($_[1]) }
 
-sub _is_even { $_[1] % 2 ? 0 : 1; }
+sub _is_one { gcmp1($_[1]) }
 
-sub _is_odd { $_[1] % 2 ? 1 : 0; }
+sub _is_even { bittest($_[1],0) ? 0 : 1 }
 
-sub _acmp { $_[1] <=> $_[2]; }
+sub _is_odd { bittest($_[1],0) ? 1 : 0 }
+
+sub _acmp { $_[1] <=> $_[2] }
 
 sub _check {
     my($class,$x) = @_;

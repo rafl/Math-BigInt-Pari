@@ -1,6 +1,13 @@
-$Id: Changes,v 1.2 2001/07/14 22:18:23 btrott Exp $
+$Id: Changes,v 1.5 2001/08/06 06:33:01 btrott Exp $
 
 Revision history for Math::BigInt::Pari
+
+1.02  2001.07.22
+    - Added _gcd method; uses PARI library function to return gcd.
+    - Incorporated Tels's changes: _copy() is now linear; _is_zero,
+      _is_one, is_even, and is_odd now use PARI library functions
+      rather than overloaded ops and should thus be faster. Also
+      added new tests from Math::BigInt 1.40.
 
 1.01  2001.07.14
     - Incorporated Tels's changes per calling args to plugin methods
