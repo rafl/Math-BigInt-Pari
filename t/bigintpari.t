@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 56;
+  plan tests => 61;
   }
 
 # testing of Math::BigInt::Pari, primarily for interface/api and not for the
@@ -37,6 +37,12 @@ ok (${$C->_str($C->_add($x,$z))},39485);
 my ($re,$rr) = $C->_div($x,$y);
 
 ok (${$C->_str($re)},123); ok (${$C->_str($rr)},2);
+
+# _mod
+$x = $C->_new(\"123"); $y = $C->_new(\"2");
+ok (${$C->_str($C->_mod($x,$y))},1);
+$x = $C->_new(\"123"); $y = $C->_new(\"5");
+ok (${$C->_str($C->_mod($x,$y))},3);
 
 # is_zero, _is_one, _one, _zero
 ok ($C->_is_zero($x),0);
@@ -116,6 +122,17 @@ ok (${$C->_str($x)},'32');
 $x = $C->_new(\"123456789");
 ok ($C->_check($x),0);
 ok ($C->_check(123),'123 is not a reference to Math::Pari');
+
+# _lsft, _rsft
+$x = $C->_new(\"64"); $y = $C->_new(\"2");
+$z = $C->_lsft($x,$y,2);
+ok (${$C->_str($z)},'256');
+$z = $C->_rsft($x,$y,2);
+ok (${$C->_str($z)},'64');
+$x = $C->_new(\"64");
+$z = $C->_lsft($x,$y,3);
+ok (1,1) if !defined $z;
+ok($z,'undef') if defined $z;
 
 # done
 

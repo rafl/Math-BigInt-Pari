@@ -9,8 +9,8 @@ WriteMakefile(
     AUTHOR => 'Benjamin Trott <ben@rhumba.pair.com>',
     ABSTRACT => 'Use Math::Pari for Math::BigInt routines',
     PREREQ_PM => {
-        'Math::BigInt' => '1.42',
-        'Math::BigFloat' => '1.21',
+        'Math::BigInt' => '1.44',
+        'Math::BigFloat' => '1.23',
         'Math::Pari' => '2.001804',
     },
 );

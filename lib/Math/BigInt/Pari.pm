@@ -2,7 +2,7 @@ package Math::BigInt::Pari;
 use strict;
 
 use vars qw( @ISA @EXPORT $VERSION );
-$VERSION = '1.03';
+$VERSION = '1.04';
 
 use Math::Pari qw( PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd );
 
@@ -84,6 +84,8 @@ sub _div {
   $_[1];
 }
 
+sub _mod { $_[1] %= $_[2]; }
+
 sub _inc { $_[1]++ }
 
 sub _dec { $_[1]-- }
@@ -117,6 +119,20 @@ sub _check {
     return "$x is not a reference to Math::Pari" if ref($x) ne 'Math::Pari';
     0;
 }
+
+sub _rsft
+  {
+  # (X,Y,N) = @_; means X >> Y in base N
+  return undef if $_[3] != 2;
+  $_[1] >>= $_[2];
+  }
+
+sub _lsft
+  {
+  # (X,Y,N) = @_; means X >> Y in base N
+  return undef if $_[3] != 2;
+  $_[1] <<= $_[2];
+  }
 
 1;
 __END__

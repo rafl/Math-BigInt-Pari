@@ -1,6 +1,31 @@
-$Id: Changes,v 1.7 2001/09/03 19:07:42 btrott Exp $
-
 Revision history for Math::BigInt::Pari
+
+2001-01-01 v1.04 Tels
+ - tests from BigInt v1.45
+ - added _mod() for faster % operator (about two times faster now)
+ - added _lsft() and _rsft() for faster shifting
+
+	#!/usr/bin/perl -w
+	use lib 'lib';
+	use Math::BigInt lib => 'Pari';
+	use Benchmark;
+	my $c = 20000;
+	my $x = Math::BigInt->new(1); my $z = $x->copy()->blsft($c);
+	my $x1 = Math::BigInt->new(1); my $z1 = $x->copy()->blsft($c*10);
+	timethese ( $c, {
+	  right_1 => sub { $x->brsft(1,2); },
+	  left_1 => sub { $z->blsft(1,2); },
+	  right_10 => sub { $x1->blsft(10,2); },
+	  left_10 => sub { $z1->brsft(10,2); }, } );
+
+	Results (operations per second) on a 1Ghz Athlon:
+	
+			v1.03	v1.04	Factor
+	  -------------------------------------
+	    left_1:      2577    6450	2.5
+	   left_10:       881    3086	3.5
+	   right_1:      2928    6990   2.4
+	  right_10:      2020    5465   2.7
 
 1.03  2001.09.02
     - Incorporated Tels's changes: no longer need to EXPORT_OK functions;

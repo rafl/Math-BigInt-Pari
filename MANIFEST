@@ -1,8 +1,10 @@
-Changes
+CHANGES
 MANIFEST
 Makefile.PL
 README
 lib/Math/BigInt/Pari.pm
+t/bigfltpm.inc
 t/bigfltpm.t
 t/bigintpari.t
+t/bigintpm.inc
 t/bigintpm.t
