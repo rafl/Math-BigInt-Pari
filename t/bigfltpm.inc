@@ -4,7 +4,7 @@ ok ($class->config()->{lib},$CL);
 
 while (<DATA>)
   {
-  chop;
+  chomp;
   $_ =~ s/#.*$//;	# remove comments
   $_ =~ s/\s+$//;	# trailing spaces
   next if /^$/;		# skip empty lines & comments
@@ -147,6 +147,26 @@ $x = Math::BigInt->new(1200); $y = $class->new($x);
 ok ($y,1200); ok ($x,1200);
 
 ###############################################################################
+# Really huge, big, ultra-mega-biggy-monster exponents
+# Technically, the exponents should not be limited (they are BigInts), but
+# practically there are a few places were they are limited to a Perl scalar.
+# This is sometimes for speed, sometimes because otherwise the number wouldn't
+# fit into your memory (just think of 1e123456789012345678901234567890 + 1!)
+# anway. We don't test everything here, but let's make sure it basically works.
+
+# new
+ok ($class->new('1e1234567890123456789012345678901234567890')->bsstr(),
+                '1e+1234567890123456789012345678901234567890');
+# cmp
+ok ($class->new('1e1234567890123456789012345678901234567890') > 0,1);
+
+# sub/mul 
+ok ($class->new('1e1234567890123456789012345678901234567890')->bsub(
+                '1e1234567890123456789012345678901234567890'),0);
+ok ($class->new('1e1234567890123456789012345678901234567890')->bmul(2)->bsstr(),
+                '2e+1234567890123456789012345678901234567890');
+
+###############################################################################
 # zero,inf,one,nan
 
 $x = $class->new(2); $x->fzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
@@ -193,6 +213,42 @@ $class->accuracy(undef); $class->precision(undef); # reset for further tests
 $try = '@args' . " = $class" . "::objectify(2,$class,4,5);".'join(" ",@args);';
 $ans = eval $try;
 ok ($ans,"$class 4 5");
+
+###############################################################################
+# test whether an opp calls objectify properly or not (or at least does what
+# it should do given non-objects, w/ or w/o objectify())
+
+ok ($class->new(123)->badd(123),246);
+ok ($class->badd(123,321),444);
+ok ($class->badd(123,$class->new(321)),444);
+
+ok ($class->new(123)->bsub(122),1);
+ok ($class->bsub(321,123),198);
+ok ($class->bsub(321,$class->new(123)),198);
+
+ok ($class->new(123)->bmul(123),15129);
+ok ($class->bmul(123,123),15129);
+ok ($class->bmul(123,$class->new(123)),15129);
+
+ok ($class->new(15129)->bdiv(123),123);
+ok ($class->bdiv(15129,123),123);
+ok ($class->bdiv(15129,$class->new(123)),123);
+
+ok ($class->new(15131)->bmod(123),2);
+ok ($class->bmod(15131,123),2);
+ok ($class->bmod(15131,$class->new(123)),2);
+
+ok ($class->new(2)->bpow(16),65536);
+ok ($class->bpow(2,16),65536);
+ok ($class->bpow(2,$class->new(16)),65536);
+
+ok ($class->new(2**15)->brsft(1),2**14);
+ok ($class->brsft(2**15,1),2**14);
+ok ($class->brsft(2**15,$class->new(1)),2**14);
+
+ok ($class->new(2**13)->blsft(1),2**14);
+ok ($class->blsft(2**13,1),2**14);
+ok ($class->blsft(2**13,$class->new(1)),2**14);
 
 1; # all done
 
@@ -384,7 +440,7 @@ abc:123.456:NaN
 #     1.41..7 and not 1.4170 since fallback (bsqrt(9) is '3', not 3.0...0)
 2:0.5:1.41421356237309504880168872420969807857
 #2:0.2:1.148698354997035006798626946777927589444
-6:1.5:14.6969384566990685891837044482353483518
+#6:1.5:14.6969384566990685891837044482353483518
 $div_scale = 20;
 #62.5:12.5:26447206647554886213592.3959144
 $div_scale = 40;

@@ -2,12 +2,16 @@ package Math::BigInt::Pari;
 use strict;
 
 use vars qw( @ISA @EXPORT $VERSION );
-$VERSION = '1.08';
+$VERSION = '1.09';
 
-use Math::Pari qw(PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd ifact);
+use Math::Pari qw(PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd ifact gpui gmul);
 
 # MBI will call this, so catch it and throw it away
 sub import { }
+
+my $ten = PARI(10);	# for _digit
+my $zero = PARI(0);	# for _copy
+my $one = PARI(1);	# for _inc and _dec
 
 sub _new { PARI(${ $_[1] }) }
 
@@ -62,7 +66,7 @@ sub _mp2os {
 sub _zero { PARI(0) }
 sub _one  { PARI(1) }
 
-sub _copy { $_[1] + PARI(0) }
+sub _copy { $_[1] + $zero; }
 
 sub _str { my $x = pari2pv($_[1]); \$x }
 
@@ -78,28 +82,25 @@ sub _sub {
     }
 }
 
-sub _mul { $_[1] *= $_[2] }
+sub _mul { $_[1] = gmul($_[1],$_[2]) }
 
-sub _div {
-    if (wantarray)
-      {
-      my $r = $_[1] % $_[2];
-      $_[1] = gdivent($_[1], $_[2]);
-      return ($_[1], $r);
-      }
-    else
-      {
-      $_[1] = gdivent($_[1], $_[2]);
-      }
-  $_[1];
-}
+sub _div
+  {
+  if (wantarray)
+    {
+    my $r = $_[1] % $_[2];
+    $_[1] = gdivent($_[1], $_[2]);
+    return ($_[1], $r);
+    }
+  $_[1] = gdivent($_[1], $_[2]);
+  }
 
 sub _mod { $_[1] %= $_[2]; }
 
 #sub _inc { ++$_[1]; }	# ++ and -- flotify (bug in Pari)
 #sub _dec { --$_[1]; }
-sub _inc { $_[1] += PARI(1); }
-sub _dec { $_[1] -= PARI(1); }
+sub _inc { $_[1] += $one; }
+sub _dec { $_[1] -= $one; }
 
 sub _and { $_[1] &= $_[2] }
 
@@ -107,13 +108,24 @@ sub _xor { $_[1] ^= $_[2] }
 
 sub _or { $_[1] |= $_[2] }
 
-sub _pow { $_[1] **= $_[2] }
+sub _pow { gpui($_[1], $_[2]) }
 
 sub _gcd { gcd($_[1], $_[2]) }
 
-sub _len { length(pari2pv($_[1])) }
+sub _len { length(pari2pv($_[1])) }	# costly!
 
-sub _digit { substr(pari2pv($_[1]), -($_[2]+1), 1) }
+sub _digit
+  {
+  # if $n < 0, we need to count from left and thus can't use the other method:
+  if ($_[2] < 0)
+    {
+    return substr(pari2pv($_[1]), -($_[2]+1), 1);
+    }
+  # else this is faster (except for very short numbers)
+  # shift the number right by $n digits, then extract last digit via % 10
+  pari2pv ( gdivent($_[1], $ten ** $_[2]) % $ten );
+
+  }
 
 sub _is_zero { gcmp0($_[1]) }
 
