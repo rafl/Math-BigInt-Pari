@@ -153,6 +153,19 @@ $x = $class->new(2); $x->fzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
 $x = $class->new(2); $x->finf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
 $x = $class->new(2); $x->fone();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
 $x = $class->new(2); $x->fnan();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+
+###############################################################################
+# bone/binf etc as plain calls (Lite failed them)
+
+ok ($class->fzero(),0);
+ok ($class->fone(),1);
+ok ($class->fone('+'),1);
+ok ($class->fone('-'),-1);
+ok ($class->fnan(),'NaN');
+ok ($class->finf(),'inf');
+ok ($class->finf('+'),'inf');
+ok ($class->finf('-'),'-inf');
+ok ($class->finf('-inf'),'-inf');
         
 ###############################################################################
 # fsqrt() with set global A/P or A/P enabled on $x, also a test whether fsqrt()
@@ -173,6 +186,13 @@ ${${class}.'::accuracy'} = 4; $x = $class->new(12); $x->fsqrt(3); ok ($x,'NaN');
 $class->precision(undef); $x = $class->new(12); $x->fsqrt(3); ok ($x,'3.46');
 
 $class->accuracy(undef); $class->precision(undef); # reset for further tests
+
+###############################################################################
+# can we call objectify (broken until v1.52)
+
+$try = '@args' . " = $class" . "::objectify(2,$class,4,5);".'join(" ",@args);';
+$ans = eval $try;
+ok ($ans,"$class 4 5");
 
 1; # all done
 
@@ -195,22 +215,23 @@ $div_scale = 40;
 -2:NaN
 1:0
 # this is too slow for the testsuite
+#2:0.6931471805599453094172321214581765680755
 #2.718281828:0.9999999998311266953289851340574956564911
 #$div_scale = 20;
 #2.718281828:0.99999999983112669533
-1:0
 # too slow, too (or hangs?)
 #123:4.8112184355
-# $div_scale = 14;
+$div_scale = 14;
 #10:0:2.302585092994
 #1000:0:6.90775527898214
 #100:0:4.60517018598809
-#2:0:0.693147180559945
+2:0:0.69314718055995
 #3.1415:0:1.14470039286086
 #12345:0:9.42100640177928
 #0.001:0:-6.90775527898214
 # reset for further tests
 $div_scale = 40;
+1:0
 &frsft
 NaNfrsft:2:NaN
 0:2:0
@@ -359,6 +380,14 @@ abc:123.456:NaN
 -inf:123.45:-inf
 +inf:-123.45:inf
 -inf:-123.45:-inf
+# 2 ** 0.5 == sqrt(2)
+#     1.41..7 and not 1.4170 since fallback (bsqrt(9) is '3', not 3.0...0)
+2:0.5:1.41421356237309504880168872420969807857
+#2:0.2:1.148698354997035006798626946777927589444
+6:1.5:14.6969384566990685891837044482353483518
+$div_scale = 20;
+#62.5:12.5:26447206647554886213592.3959144
+$div_scale = 40;
 &fneg
 fnegNaN:NaN
 +inf:-inf
@@ -752,8 +781,8 @@ fincNaN:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
-+inf:-inf:0
--inf:+inf:0
++inf:-inf:NaN
+-inf:+inf:NaN
 +inf:+inf:inf
 -inf:-inf:-inf
 baddNaN:+inf:NaN
@@ -801,8 +830,8 @@ abc:+0:NaN
 +0:abc:NaN
 +inf:-inf:inf
 -inf:+inf:-inf
-+inf:+inf:0
--inf:-inf:0
++inf:+inf:NaN
+-inf:-inf:NaN
 baddNaN:+inf:NaN
 baddNaN:+inf:NaN
 +inf:baddNaN:NaN

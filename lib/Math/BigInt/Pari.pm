@@ -2,7 +2,7 @@ package Math::BigInt::Pari;
 use strict;
 
 use vars qw( @ISA @EXPORT $VERSION );
-$VERSION = '1.07';
+$VERSION = '1.08';
 
 use Math::Pari qw(PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd ifact);
 
@@ -62,7 +62,7 @@ sub _mp2os {
 sub _zero { PARI(0) }
 sub _one  { PARI(1) }
 
-sub _copy { $_[1] + 0 }
+sub _copy { $_[1] + PARI(0) }
 
 sub _str { my $x = pari2pv($_[1]); \$x }
 

@@ -1,5 +1,8 @@
 Revision history for Math::BigInt::Pari
 
+2002-03-23 v1.08 Tels
+ - testsuite from MBI v1.55
+ - prerequisite fixed
 2002-02-21 v1.07 Tels
  - Math::Pari has _hex_cvt(), which makes from_hex() fast, but doesn't have
    something for from_bin(). Now _from_bin() repacks the input as hex number

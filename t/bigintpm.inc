@@ -164,7 +164,7 @@ while (<DATA>)
       }elsif ($f eq "bpow"){
         $try .= "\$x ** \$y;";
       }elsif ($f eq "digit"){
-        $try = "\$x = $class->new('$args[0]'); \$x->digit($args[1]);";
+        $try .= "\$x->digit(\$y);";
       } else { warn "Unknown op '$f'"; }
     } # end else all other ops
 
@@ -311,25 +311,25 @@ $x = Math::BigInt->new(0); if (!$x) { ok (1,1); } else { ok($x,'to be false') }
 
 @args = Math::BigInt::objectify(2,4,5);
 ok (scalar @args,3);		# $class, 4, 5
-ok ($args[0],$class);
+ok ($args[0] =~ /^Math::BigInt/);
 ok ($args[1],4);
 ok ($args[2],5);
 
 @args = Math::BigInt::objectify(0,4,5);
 ok (scalar @args,3);		# $class, 4, 5
-ok ($args[0],$class);
+ok ($args[0] =~ /^Math::BigInt/);
 ok ($args[1],4);
 ok ($args[2],5);
 
 @args = Math::BigInt::objectify(2,4,5);
 ok (scalar @args,3);		# $class, 4, 5
-ok ($args[0],$class);
+ok ($args[0] =~ /^Math::BigInt/);
 ok ($args[1],4);
 ok ($args[2],5);
 
 @args = Math::BigInt::objectify(2,4,5,6,7);
 ok (scalar @args,5);		# $class, 4, 5, 6, 7
-ok ($args[0],$class);
+ok ($args[0] =~ /^Math::BigInt/);
 ok ($args[1],4); ok (ref($args[1]),$args[0]);
 ok ($args[2],5); ok (ref($args[2]),$args[0]);
 ok ($args[3],6); ok (ref($args[3]),'');
@@ -446,6 +446,11 @@ if ($x > $BASE) { ok (1,1) } else { ok ("$x > $BASE","$x < $BASE"); }
 $x = $class->new($MAX); ok ($x->length(), length($MAX));
 
 ###############################################################################
+# test bug that $class->digit($string) did not work
+
+ok ($class->digit(123,2),1);
+
+###############################################################################
 # bug in sub where number with at least 6 trailing zeros after any op failed
 
 $x = $class->new(123456); $z = $class->new(10000); $z *= 10; $x -= $z;
@@ -489,6 +494,20 @@ $x = $class->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
 
 ok ($y,'0'); is_valid($y);	# $y not '-0'
 
+###############################################################################
+# bone/binf etc as plain calls (Lite failed them)
+
+ok ($class->bzero(),0);
+ok ($class->bone(),1);
+ok ($class->bone('+'),1);
+ok ($class->bone('-'),-1);
+ok ($class->bnan(),'NaN');
+ok ($class->binf(),'inf');
+ok ($class->binf('+'),'inf');
+ok ($class->binf('-'),'-inf');
+ok ($class->binf('-inf'),'-inf');
+
+###############################################################################
 # all tests done
 
 1;
@@ -514,15 +533,20 @@ sub is_valid
   my ($x,$f) = @_;
 
   my $e = 0;			# error?
+
+  # allow the check to pass for all Lite, and all MBI and subclasses
   # ok as reference? 
-  $e = 'Not a reference to Math::BigInt' if !ref($x);
+  $e = 'Not a reference to Math::BigInt' if ref($x) !~ /^Math::BigInt/;
 
-  # has ok sign?
-  $e = "Illegal sign $x->{sign} (expected: '+', '-', '-inf', '+inf' or 'NaN'"
-   if $e eq '0' && $x->{sign} !~ /^(\+|-|\+inf|-inf|NaN)$/;
-
-  $e = "-0 is invalid!" if $e ne '0' && $x->{sign} eq '-' && $x == 0;
-  $e = $CALC->_check($x->{value}) if $e eq '0';
+  if (ref($x) ne 'Math::BigInt::Lite')
+    {
+    # has ok sign?
+    $e = "Illegal sign $x->{sign} (expected: '+', '-', '-inf', '+inf' or 'NaN'"
+     if $e eq '0' && $x->{sign} !~ /^(\+|-|\+inf|-inf|NaN)$/;
+  
+    $e = "-0 is invalid!" if $e ne '0' && $x->{sign} eq '-' && $x == 0;
+    $e = $CALC->_check($x->{value}) if $e eq '0';
+    }
 
   # test done, see if error did crop up
   ok (1,1), return if ($e eq '0');
@@ -836,6 +860,10 @@ NaN::0
 +inf:+:1
 -inf:-:1
 -inf:+:0
+-inf:-inf:1
+-inf:+inf:0
++inf:-inf:0
++inf:+inf:1
 # it must be exactly /^[+-]inf$/
 +infinity::0
 -infinity::0
@@ -1024,6 +1052,26 @@ baddNaN:+inf:NaN
 -123456789:987654321:864197532
 -123456789:-987654321:-1111111110
 +123456789:-987654321:-864197532
+-1:10001:10000
+-1:100001:100000
+-1:1000001:1000000
+-1:10000001:10000000
+-1:100000001:100000000
+-1:1000000001:1000000000
+-1:10000000001:10000000000
+-1:100000000001:100000000000
+-1:1000000000001:1000000000000
+-1:10000000000001:10000000000000
+-1:-10001:-10002
+-1:-100001:-100002
+-1:-1000001:-1000002
+-1:-10000001:-10000002
+-1:-100000001:-100000002
+-1:-1000000001:-1000000002
+-1:-10000000001:-10000000002
+-1:-100000000001:-100000000002
+-1:-1000000000001:-1000000000002
+-1:-10000000000001:-10000000000002
 &bsub
 abc:abc:NaN
 abc:+0:NaN
@@ -1066,6 +1114,26 @@ abc:+0:NaN
 -123456789:+987654321:-1111111110
 -123456789:-987654321:864197532
 +123456789:-987654321:1111111110
+10001:1:10000
+100001:1:100000
+1000001:1:1000000
+10000001:1:10000000
+100000001:1:100000000
+1000000001:1:1000000000
+10000000001:1:10000000000
+100000000001:1:100000000000
+1000000000001:1:1000000000000
+10000000000001:1:10000000000000
+10001:-1:10002
+100001:-1:100002
+1000001:-1:1000002
+10000001:-1:10000002
+100000001:-1:100000002
+1000000001:-1:1000000002
+10000000001:-1:10000000002
+100000000001:-1:100000000002
+1000000000001:-1:1000000000002
+10000000000001:-1:10000000000002
 &bmul
 abc:abc:NaN
 abc:+0:NaN
@@ -1318,6 +1386,32 @@ abc:1:abc:NaN
 100041000510123:3:0
 152403346:12345:4321
 9:5:4
+# test shortcuts in Calc
+# 1ex % 9 is always == 1, 1ex % 113 is != 1 for x = (4..9), 1ex % 10 = 0
+1234:9:1
+123456:9:3
+12345678:9:0
+1234567891:9:1
+123456789123:9:6
+12345678912345:9:6
+1234567891234567:9:1
+123456789123456789:9:0
+1234:10:4
+123456:10:6
+12345678:10:8
+1234567891:10:1
+123456789123:10:3
+12345678912345:10:5
+1234567891234567:10:7
+123456789123456789:10:9
+1234:113:104
+123456:113:60
+12345678:113:89
+1234567891:113:64
+123456789123:113:95
+12345678912345:113:53
+1234567891234567:113:56
+123456789123456789:113:39
 &bgcd
 abc:abc:NaN
 abc:+0:NaN
