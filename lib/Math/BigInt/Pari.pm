@@ -2,7 +2,7 @@ package Math::BigInt::Pari;
 use strict;
 
 use vars qw( @ISA @EXPORT $VERSION );
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 use Math::Pari qw( PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd );
 
@@ -86,9 +86,10 @@ sub _div {
 
 sub _mod { $_[1] %= $_[2]; }
 
-sub _inc { $_[1]++ }
-
-sub _dec { $_[1]-- }
+#sub _inc { ++$_[1]; }
+#sub _dec { --$_[1]; }
+sub _inc { $_[1] += PARI(1); }	# ++ does not work, gives 8.00000 instead of 8
+sub _dec { $_[1] -= PARI(1); }  # -- does not work, gives 8.00000 insetad of 8
 
 sub _and { $_[1] &= $_[2] }
 

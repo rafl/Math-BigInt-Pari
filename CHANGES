@@ -1,6 +1,9 @@
 Revision history for Math::BigInt::Pari
 
-2001-01-01 v1.04 Tels
+2001-11-11 v1.05 Tels
+  - fixed _inc() and _dec() so that they can be used by MBI v1.46
+
+2001-11-01 v1.04 Tels
  - tests from BigInt v1.45
  - added _mod() for faster % operator (about two times faster now)
  - added _lsft() and _rsft() for faster shifting

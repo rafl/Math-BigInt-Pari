@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 61;
+  plan tests => 63;
   }
 
 # testing of Math::BigInt::Pari, primarily for interface/api and not for the
@@ -84,6 +84,10 @@ $x = $C->_new(\"123"); $y = $C->_new(\"1111");
 $x = $C->_new(\"7"); $y = $C->_new(\"5"); ok (${$C->_str($C->_and($x,$y))},5);
 $x = $C->_new(\"6"); $y = $C->_new(\"1"); ok (${$C->_str($C->_or($x,$y))},7);
 $x = $C->_new(\"9"); $y = $C->_new(\"6"); ok (${$C->_str($C->_xor($x,$y))},15);
+
+# _inc, _dec
+$x = $C->_new(\"7"); ok (${$C->_str($C->_inc($x))},8);
+ok (${$C->_str($C->_dec($x))},7);
 
 my $r;
 # to check bit-counts
