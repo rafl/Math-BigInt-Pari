@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 72;
+  plan tests => 79;
   }
 
 # testing of Math::BigInt::Pari, primarily for interface/api and not for the
@@ -155,6 +155,21 @@ $x = $C->_new(\"4"); ok (${$C->_str($C->_fac($x))},24);
 $x = $C->_new(\"5"); ok (${$C->_str($C->_fac($x))},120);
 $x = $C->_new(\"6"); ok (${$C->_str($C->_fac($x))},720);
 $x = $C->_new(\"7"); ok (${$C->_str($C->_fac($x))},5040);
+
+# _as_hex
+$x = $C->_new(\"0"); ok (${$C->_as_hex($x)},'0x0');
+$x = $C->_new(\"1"); ok (${$C->_as_hex($x)},'0x1');
+$x = $C->_new(\"16"); ok (${$C->_as_hex($x)},'0x10');
+
+# _as_bin
+$x = $C->_new(\"0"); ok (${$C->_as_bin($x)},'0b0');
+$x = $C->_new(\"1"); ok (${$C->_as_bin($x)},'0b1');
+$x = $C->_new(\"16"); ok (${$C->_as_bin($x)},'0b10000');
+
+# _modinv
+$x = $C->_new(\"8"); $y = $C->_new(\"5033");
+my ($res,$sign) = $C->_modinv($x,$y);
+ok ( join(":", ${$C->_str($res)}, $sign), "629:-");
 
 # done
 

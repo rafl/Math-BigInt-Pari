@@ -1,5 +1,11 @@
 Revision history for Math::BigInt::Pari
 
+2004-01-07 v1.10 Tels
+ * testsuite from MBI v1.68 - 4583 tests
+ * _as_hex() and _as_bin() handle zero, tests for that
+ * bacmp() is about 11% faster due to _acmp() using gcmp() vs. "<=>"
+ * added _modinv() and tests
+
 2002-07-07 v1.09 Tels
  - testsuite from MBI v1.60 - 4061 tests
  - prerequisite fixed
@@ -7,7 +13,7 @@ Revision history for Math::BigInt::Pari
    copy:  6 secs ( 5.16 usr + 0.04 sys = 5.20 CPU) @ 23649.23/s (n=122976)
    copy:  5 secs ( 5.19 usr + 0.06 sys = 5.25 CPU) @ 27047.05/s (n=141997)
  - digit() now uses a method that scales much better when extracting digits
-   counntig from the right side ($n > 0)
+   counting from the right side ($n > 0)
  - likeweise, _inc and _dec use $one instead of PARI(0). Benchmark over
    Math::BigInt->bdec() and binc() (not just _inc() and _dec()!):
 
@@ -40,11 +46,12 @@ Revision history for Math::BigInt::Pari
  - added _fac() for faster factorial() (used from MBI v1.50 onwards)
 
 	#!/usr/bin/perl -w
-
 	use lib 'lib';
-        use Math::BigInt lib => 'Pari';
-        use Benchmark;                                                                  my $c = 20000;
-        my $x = Math::BigInt->new(1); my $z = $x->copy()->blsft($c);                    my $x1 = Math::BigInt->new(1); my $z1 = $x->copy()->blsft($c*10);
+	use Math::BigInt lib => 'Pari';
+	use Benchmark;
+	my $c = 20000;
+	my $x = Math::BigInt->new(1); my $z = $x->copy()->blsft($c);
+	my $x1 = Math::BigInt->new(1); my $z1 = $x->copy()->blsft($c*10);
         timethese ( -3, {
           right_1_10 => sub { $x->brsft(1,10); },
           left_1_10 => sub { $z->blsft(1,10); },

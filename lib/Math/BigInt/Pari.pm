@@ -1,10 +1,11 @@
 package Math::BigInt::Pari;
+
+$VERSION = '1.10';
+
 use strict;
 
-use vars qw( @ISA @EXPORT $VERSION );
-$VERSION = '1.09';
-
-use Math::Pari qw(PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd ifact gpui gmul);
+use Math::Pari 
+ qw(PARI pari2pv gdivent bittest gcmp gcmp0 gcmp1 gcd ifact gpui gmul);
 
 # MBI will call this, so catch it and throw it away
 sub import { }
@@ -34,13 +35,15 @@ sub _from_bin
 
 sub _as_hex {
     my $v = unpack('H*', _mp2os($_[1]));
-    $v =~ s!^0*!!;
-    \('0x' . $v);
+    return \"0x0" if $v eq '';
+    $v =~ s/^0*/0x/;
+    \$v;
 }
 sub _as_bin {
     my $v = unpack('B*', _mp2os($_[1]));
-    $v =~ s!^0*!!;
-    \('0b' . $v);
+    return \"0b0" if $v eq '';
+    $v =~ s/^0*/0b/;
+    \$v;
 }
 
 sub _mp2os {
@@ -135,7 +138,7 @@ sub _is_even { bittest($_[1],0) ? 0 : 1 }
 
 sub _is_odd { bittest($_[1],0) ? 1 : 0 }
 
-sub _acmp { $_[1] <=> $_[2] }
+sub _acmp { gcmp($_[1],$_[2]) }
 
 sub _check {
     my($class,$x) = @_;
@@ -146,7 +149,7 @@ sub _check {
 sub _rsft
   {
   # (X,Y,N) = @_; means X >> Y in base N
-  #return undef if $_[3] != 2;
+  
   if ($_[3] != 2)
     {
     return $_[1] = gdivent($_[1], PARI($_[3]) ** $_[2]);
@@ -157,7 +160,7 @@ sub _rsft
 sub _lsft
   {
   # (X,Y,N) = @_; means X >> Y in base N
-  #return undef if $_[3] != 2;
+  
   if ($_[3] != 2)
     {
     return $_[1] *= PARI($_[3]) ** $_[2];
@@ -169,6 +172,37 @@ sub _fac
   {
   # factorial of argument
   $_[1] = ifact($_[1]);
+  }
+
+sub _modinv
+  {
+  # modular inverse
+  my ($c,$x,$y) = @_;
+
+  my $u = PARI(0); my $u1 = PARI(1);
+  my $a = _copy($c,$y); my $b = _copy($c,$x);
+
+  # Euclid's Algorithm for bgcd(), only that we calc bgcd() ($a) and the
+  # result ($u) at the same time. See comments in BigInt for why this works.
+  my $q;
+  ($a, $q, $b) = ($b, _div($c,$a,$b));          # step 1
+  my $sign = 1;
+  while (!_is_zero($c,$b))
+    {
+    my $t = _add($c,                            # step 2:
+       _mul($c,_copy($c,$u1), $q) ,             #  t =  u1 * q
+       $u );                                    #     + u
+    $u = $u1;                                   #  u = u1, u1 = t
+    $u1 = $t;
+    $sign = -$sign;
+    ($a, $q, $b) = ($b, _div($c,$a,$b));        # step 1
+    }
+
+  # if the gcd is not 1, then return NaN
+  return (undef,undef) unless _is_one($c,$a);
+
+  $sign = $sign == 1 ? '+' : '-';
+  ($u1,$sign);
   }
 
 1;
@@ -196,7 +230,8 @@ under the same terms as Perl itself.
 
 =head1 AUTHOR
 
-Math::BigInt::Pari was written by Benjamin Trott, ben@rhumba.pair.com.
+Original Math::BigInt::Pari written by Benjamin Trott 2001, ben@rhumba.pair.com.
+Extended and maintained by Tels 2001-2004 http://bloodgate.com
 
 Math::Pari was written by Ilya Zakharevich.
 

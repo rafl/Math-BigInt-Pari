@@ -1,10 +1,13 @@
 CHANGES
 MANIFEST
-Makefile.PL
+NEW
 README
+SIGNATURE
+Makefile.PL
 lib/Math/BigInt/Pari.pm
 t/bigfltpm.inc
 t/bigfltpm.t
 t/bigintpari.t
 t/bigintpm.inc
 t/bigintpm.t
+META.yml                                 Module meta-data (added by MakeMaker)

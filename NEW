@@ -1,0 +1,11 @@
+
+
+What's new in this version of Math::BigInt::Pari:
+
+v1.10:
+ * testsuite from MBI v1.68 - 4583 tests
+ * _as_hex() and _as_bin() handle zero, tests for that
+ * bacmp() is about 11% faster due to _acmp() using gcmp() vs. "<=>"
+ * added _modinv() and tests
+ * signed distribution, added NEW
+

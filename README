@@ -1,4 +1,3 @@
-$Id: README,v 1.1.1.1 2001/07/12 05:49:40 btrott Exp $
 
 This is Math::BigInt::Pari, a plugin module for Math::BigInt that
 replaces Math::BigInt's core math routines with Math::Pari routines.
