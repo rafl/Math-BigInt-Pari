@@ -2,9 +2,9 @@ package Math::BigInt::Pari;
 use strict;
 
 use vars qw( @ISA @EXPORT $VERSION );
-$VERSION = '1.05';
+$VERSION = '1.06';
 
-use Math::Pari qw( PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd );
+use Math::Pari qw(PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd ifact);
 
 # MBI will call this, so catch it and throw it away
 sub import { }
@@ -86,10 +86,10 @@ sub _div {
 
 sub _mod { $_[1] %= $_[2]; }
 
-#sub _inc { ++$_[1]; }
+#sub _inc { ++$_[1]; }	# ++ and -- flotify (bug in Pari)
 #sub _dec { --$_[1]; }
-sub _inc { $_[1] += PARI(1); }	# ++ does not work, gives 8.00000 instead of 8
-sub _dec { $_[1] -= PARI(1); }  # -- does not work, gives 8.00000 insetad of 8
+sub _inc { $_[1] += PARI(1); }
+sub _dec { $_[1] -= PARI(1); }
 
 sub _and { $_[1] &= $_[2] }
 
@@ -124,15 +124,29 @@ sub _check {
 sub _rsft
   {
   # (X,Y,N) = @_; means X >> Y in base N
-  return undef if $_[3] != 2;
+  #return undef if $_[3] != 2;
+  if ($_[3] != 2)
+    {
+    return $_[1] = gdivent($_[1], PARI($_[3]) ** $_[2]);
+    }
   $_[1] >>= $_[2];
   }
 
 sub _lsft
   {
   # (X,Y,N) = @_; means X >> Y in base N
-  return undef if $_[3] != 2;
+  #return undef if $_[3] != 2;
+  if ($_[3] != 2)
+    {
+    return $_[1] *= PARI($_[3]) ** $_[2];
+    }
   $_[1] <<= $_[2];
+  }
+
+sub _fac
+  {
+  # factorial of argument
+  $_[1] = ifact($_[1]);
   }
 
 1;

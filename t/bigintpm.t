@@ -10,12 +10,13 @@ BEGIN
   my $location = $0; $location =~ s/bigintpm.t//;
   unshift @INC, $location; # to locate the testing files
   # chdir 't' if -d 't';
-  plan tests => 1591;
+  plan tests => 2066;
   }
 
 use Math::BigInt lib => 'Pari';
 
-use vars qw ($scale $class $try $x $y $f @args $ans $ans1 $ans1_str $setup);
+use vars qw ($scale $class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
 $class = "Math::BigInt";
+$CL = "Math::BigInt::Pari";
 
 require 'bigintpm.inc';	# all tests here for sharing

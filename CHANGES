@@ -1,5 +1,32 @@
 Revision history for Math::BigInt::Pari
 
+2002-02-10 v1.06 Tels
+ - _lsft() and _rsft() do now bases != 2, too
+ - tests are now from v1.50
+ - added _fac() for faster factorial() (used from MBI v1.50 onwards)
+
+	#!/usr/bin/perl -w
+
+	use lib 'lib';
+        use Math::BigInt lib => 'Pari';
+        use Benchmark;                                                                  my $c = 20000;
+        my $x = Math::BigInt->new(1); my $z = $x->copy()->blsft($c);                    my $x1 = Math::BigInt->new(1); my $z1 = $x->copy()->blsft($c*10);
+        timethese ( -3, {
+          right_1_10 => sub { $x->brsft(1,10); },
+          left_1_10 => sub { $z->blsft(1,10); },
+          right_10_10 => sub { $x1->blsft(10,10); },
+          left_10_10 => sub { $z1->brsft(10,10); }, } );
+
+	Results (operations per second) on a 1Ghz Athlon:
+	
+			v1.05	v1.06	Factor
+	  -------------------------------------
+	 left_10_10:     1990    6000   3.0
+ 	  left_1_10:     2280    5150   2.2
+	right_10_10:     1130    1560   1.4
+	 right_1_10:     2570    6433   2.5
+
+
 2001-11-11 v1.05 Tels
   - fixed _inc() and _dec() so that they can be used by MBI v1.46
 
@@ -30,23 +57,23 @@ Revision history for Math::BigInt::Pari
 	   right_1:      2928    6990   2.4
 	  right_10:      2020    5465   2.7
 
-1.03  2001.09.02
+1.03  2001.09.02 btrott
     - Incorporated Tels's changes: no longer need to EXPORT_OK functions;
       added empty import method.
     - Added _as_hex and _as_bin implementations for Math::Pari integers,
       to support as_hex and as_bin Math::BigInt methods.
 
-1.02  2001.08.05
+1.02  2001.08.05 btrott
     - Added _gcd method; uses PARI library function to return gcd.
     - Incorporated Tels's changes: _copy() is now linear; _is_zero,
       _is_one, is_even, and is_odd now use PARI library functions
       rather than overloaded ops and should thus be faster. Also
       added new tests from Math::BigInt 1.40.
 
-1.01  2001.07.14
+1.01  2001.07.14 btrott
     - Incorporated Tels's changes per calling args to plugin methods
       (now class is *always* the first arg, so no more checking).
       Fixed some tests per Math::BigInt changes.
 
-1.00  2001.07.11
+1.00  2001.07.11 btrott
     - Initial release.

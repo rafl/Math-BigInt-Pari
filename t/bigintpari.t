@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 63;
+  plan tests => 72;
   }
 
 # testing of Math::BigInt::Pari, primarily for interface/api and not for the
@@ -133,10 +133,28 @@ $z = $C->_lsft($x,$y,2);
 ok (${$C->_str($z)},'256');
 $z = $C->_rsft($x,$y,2);
 ok (${$C->_str($z)},'64');
-$x = $C->_new(\"64");
-$z = $C->_lsft($x,$y,3);
-ok (1,1) if !defined $z;
-ok($z,'undef') if defined $z;
+
+$x = $C->_new(\"64"); $y = $C->_new(\"2");
+$z = $C->_lsft($x,$y,10);
+ok (${$C->_str($z)},'6400');
+
+$z = $C->_rsft($z,$y,10);
+ok (${$C->_str($z)},'64');
+
+# _sqrt
+#$x = $C->_new(\"144"); ok (${$C->_str($C->_sqrt($x))},12);
+#$x = $C->_new(\"145"); ok (${$C->_str($C->_sqrt($x))},12);
+#$x = $C->_new(\"143"); ok (${$C->_str($C->_sqrt($x))},11);
+
+# _fac
+$x = $C->_new(\"0"); ok (${$C->_str($C->_fac($x))},1);
+$x = $C->_new(\"1"); ok (${$C->_str($C->_fac($x))},1);
+$x = $C->_new(\"2"); ok (${$C->_str($C->_fac($x))},2);
+$x = $C->_new(\"3"); ok (${$C->_str($C->_fac($x))},6);
+$x = $C->_new(\"4"); ok (${$C->_str($C->_fac($x))},24);
+$x = $C->_new(\"5"); ok (${$C->_str($C->_fac($x))},120);
+$x = $C->_new(\"6"); ok (${$C->_str($C->_fac($x))},720);
+$x = $C->_new(\"7"); ok (${$C->_str($C->_fac($x))},5040);
 
 # done
 

@@ -1,4 +1,7 @@
 #include this file into another test for subclass testing...
+
+ok ($class->_core_lib(),$CL);
+
 while (<DATA>)
   {
   chop;
@@ -31,53 +34,35 @@ while (<DATA>)
         $try .= "\$x;";
       } elsif ($f eq "finf") {
         $try .= "\$x->finf('$args[1]');";
-      } elsif ($f eq "fnan") {
-        $try .= "\$x->fnan();";
-      } elsif ($f eq "numify") {
-        $try .= "\$x->numify();";
+      } elsif ($f eq "is_inf") {
+        $try .= "\$x->is_inf('$args[1]');"; 
       } elsif ($f eq "fone") {
         $try .= "\$x->bone('$args[1]');";
       } elsif ($f eq "fstr") {
         $try .= "\$x->accuracy($args[1]); \$x->precision($args[2]);";
         $try .= '$x->fstr();';
-      } elsif ($f eq "fsstr") {
-        $try .= '$x->fsstr();';
       } elsif ($f eq "parts") {
         # ->bstr() to see if an object is returned
         $try .= '($a,$b) = $x->parts(); $a = $a->bstr(); $b = $b->bstr();';
         $try .= '"$a $b";';
-      } elsif ($f eq "length") {
-        $try .= '$x->length();';
       } elsif ($f eq "exponent") {
         # ->bstr() to see if an object is returned
         $try .= '$x->exponent()->bstr();';
       } elsif ($f eq "mantissa") {
         # ->bstr() to see if an object is returned
         $try .= '$x->mantissa()->bstr();';
-      } elsif ($f eq "fneg") {
-        $try .= '$x->bneg();';
-      } elsif ($f eq "fnorm") {
-        $try .= '$x->fnorm();';
-      } elsif ($f eq "bfloor") {
-        $try .= '$x->ffloor();';
-      } elsif ($f eq "bceil") {
-        $try .= '$x->fceil();';
-      } elsif ($f eq "is_zero") {
-        $try .= '$x->is_zero();';
-      } elsif ($f eq "is_one") {
-        $try .= '$x->is_one();';
-      } elsif ($f eq "is_positive") {
-        $try .= '$x->is_positive();';
-      } elsif ($f eq "is_negative") {
-        $try .= '$x->is_negative();';
-      } elsif ($f eq "is_odd") {
-        $try .= '$x->is_odd();';
-      } elsif ($f eq "is_even") {
-        $try .= '$x->is_even();';
+      } elsif ($f eq "numify") {
+        $try .= "\$x->numify();";
+      } elsif ($f eq "length") {
+        $try .= "\$x->length();";
+      # some unary ops (test the bxxx form, since that is done by AUTOLOAD)
+      } elsif ($f =~ /^f(nan|sstr|neg|floor|ceil|abs)$/) {
+        $try .= "\$x->f$1();";
+      # some is_xxx test function	
+      } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan)$/) {
+        $try .= "\$x->$f();";
       } elsif ($f eq "as_number") {
         $try .= '$x->as_number();';
-      } elsif ($f eq "fabs") {
-        $try .= '$x->fabs();';
       } elsif ($f eq "finc") {
         $try .= '++$x;';
       } elsif ($f eq "fdec") {
@@ -88,12 +73,16 @@ while (<DATA>)
         $try .= "$setup; \$x->ffround($args[1]);";
       } elsif ($f eq "fsqrt") {
         $try .= "$setup; \$x->fsqrt();";
+      } elsif ($f eq "ffac") {
+        $try .= "$setup; \$x->ffac();";
       }
     else
       {
       $try .= "\$y = new $class \"$args[1]\";";
       if ($f eq "fcmp") {
         $try .= '$x <=> $y;';
+      } elsif ($f eq "flog") {
+        $try .= '$x->flog($y);';
       } elsif ($f eq "facmp") {
         $try .= '$x->facmp($y);';
       } elsif ($f eq "fpow") {
@@ -106,10 +95,17 @@ while (<DATA>)
         $try .= '$x * $y;';
       } elsif ($f eq "fdiv") {
         $try .= "$setup; \$x / \$y;";
+      } elsif ($f eq "fdiv-list") {
+        $try .= "$setup; join(',',\$x->fdiv(\$y));";
+      } elsif ($f eq "frsft") {
+        $try .= '$x >> $y;';
+      } elsif ($f eq "flsft") {
+        $try .= '$x << $y;';
       } elsif ($f eq "fmod") {
         $try .= '$x % $y;';
       } else { warn "Unknown op '$f'"; }
     }
+    # print "# Trying: '$try'\n";
     $ans1 = eval $try;
     if ($ans =~ m|^/(.*)$|)
       {
@@ -134,6 +130,8 @@ while (<DATA>)
         print "# Tried: '$try'\n" if !ok ($ans1, $ans);
         if (ref($ans1) eq "$class")
 	  {
+	  # float numbers are normalized (for now), so mantissa shouldn't have
+	  # trailing zeros
 	  #print $ans1->_trailing_zeros(),"\n";
           print "# Has trailing zeros after '$try'\n"
 	   if !ok ($ans1->{_m}->_trailing_zeros(), 0);
@@ -143,20 +141,40 @@ while (<DATA>)
     }
   } # end while
 
-# check whether new() for BigInts destroys them ($y == 12 in this case)
+# check whether $class->new( Math::BigInt->new()) destroys it 
+# ($y == 12 in this case)
 $x = Math::BigInt->new(1200); $y = $class->new($x);
 ok ($y,1200); ok ($x,1200);
 
 ###############################################################################
-# fdiv() in list context
-$x = $class->bzero(); ($x,$y) = $x->fdiv(0);
-ok ($x,'NaN'); ok ($y,'NaN');
+# zero,inf,one,nan
 
-# fdiv() in list context
-$x = $class->bzero(); ($x,$y) = $x->fdiv(1);
-ok ($x,0); ok ($y,0);
+$x = $class->new(2); $x->fzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->finf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->fone();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->fnan();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+        
+###############################################################################
+# fsqrt() with set global A/P or A/P enabled on $x, also a test whether fsqrt()
+# correctly modifies $x
 
-# all done
+$class->accuracy(undef); $class->precision(undef);	# reset
+
+$x = $class->new(12); $class->precision(-2); $x->fsqrt(); ok ($x,'3.46');
+
+$class->precision(undef);
+$x = $class->new(12); $class->precision(0); $x->fsqrt(); ok ($x,'3');
+
+$class->precision(-3); $x = $class->new(12); $x->fsqrt(); ok ($x,'3.464');
+
+# A and P set => NaN
+${${class}.'::accuracy'} = 4; $x = $class->new(12); $x->fsqrt(3); ok ($x,'NaN');
+# supplied arg overrides set global
+$class->precision(undef); $x = $class->new(12); $x->fsqrt(3); ok ($x,'3.46');
+
+$class->accuracy(undef); $class->precision(undef); # reset for further tests
+
+1; # all done
 
 ###############################################################################
 # Perl 5.005 does not like ok ($x,undef)
@@ -170,6 +188,32 @@ sub ok_undef
   }
 
 __DATA__
+#&flog
+#$div_scale = 14;
+#10:0:2.30258509299405
+#1000:0:6.90775527898214
+#100:0:4.60517018598809
+#2:0:0.693147180559945
+#3.1415:0:1.14470039286086
+#12345:0:9.42100640177928
+#0.001:0:-6.90775527898214
+## reset for further tests
+#$div_scale = 40;
+&frsft
+#NaNfrsft:NaN
+0:2:0
+1:1:0.5
+2:1:1
+4:1:2
+123:1:61.5
+32:3:4
+&flsft
+#NaNflsft:NaN
+2:1:4
+4:3:32
+5:3:40
+1:2:4
+0:5:0
 &fnorm
 1:1
 -0:0
@@ -178,6 +222,14 @@ fnormNaN:NaN
 -inf:-inf
 123:123
 -123.4567:-123.4567
+# invalid inputs
+1__2:NaN
+1E1__2:NaN
+11__2E2:NaN
+#1.E3:NaN
+.2E-3.:NaN
+#1e3e4:NaN
+.2E2:20
 &as_number
 0:0
 1:1
@@ -664,6 +716,12 @@ fdecNaN:NaN
 -1:-2
 1.23:0.23
 -1.23:-2.23
+100:99
+101:100
+-100:-101
+-99:-100
+-98:-99
+99:98
 &finc
 fincNaN:NaN
 +inf:inf
@@ -673,6 +731,11 @@ fincNaN:NaN
 -1:0
 1.23:2.23
 -1.23:-0.23
+100:101
+-100:-99
+-99:-98
+-101:-100
+99:100
 &fadd
 abc:abc:NaN
 abc:+0:NaN
@@ -817,6 +880,11 @@ NaNmul:-inf:NaN
 +99999999999:+9:899999999991
 6:120:720
 10:10000:100000
+&fdiv-list
+0:0:NaN,NaN
+0:1:0,0
+9:4:2.25,1
+9:5:1.8,4
 &fdiv
 $div_scale = 40; $round_mode = 'even'
 abc:abc:NaN
@@ -863,6 +931,7 @@ abc:+1:abc:NaN
 +106500000:+339:314159.2920353982300884955752212389380531
 +1000000000:+3:333333333.3333333333333333333333333333333
 2:25.024996000799840031993601279744051189762:0.07992009269196593320152084692285869265447
+123456:1:123456
 $div_scale = 20
 +1000000000:+9:111111111.11111111111
 +2000000000:+9:222222222.22222222222
@@ -879,6 +948,7 @@ $div_scale = 20
 1:10000:0.0001
 1:504:0.001984126984126984127
 2:1.987654321:1.0062111801179738436
+123456789.123456789123456789123456789:1:123456789.12345678912
 # the next two cases are the "old" behaviour, but are now (>v0.01) different
 #+35500000:+113:314159.292035398230088
 #+71000000:+226:314159.292035398230088
@@ -889,17 +959,106 @@ $div_scale = 20
 $div_scale = 1
 # round to accuracy 1 after bdiv
 +124:+3:40
+123456789.1234:1:100000000
 # reset scale for further tests
 $div_scale = 40
 &fmod
-+0:0:NaN
-+0:1:0
-+3:1:0
-#+5:2:1
-#+9:4:1
-#+9:5:4
-#+9000:56:40
-#+56:9000:56
++9:4:1
++9:5:4
++9000:56:40
++56:9000:56
+# inf handling, see table in doc
+0:inf:0
+0:-inf:0
+5:inf:5
+5:-inf:5
+-5:inf:-5
+-5:-inf:-5
+inf:5:0
+-inf:5:0
+inf:-5:0
+-inf:-5:0
+5:5:0
+-5:-5:0
+inf:inf:0
+-inf:-inf:0
+-inf:inf:0
+inf:-inf:0
+8:0:8
+inf:0:inf
+# exceptions to reminder rule
+-inf:0:-inf
+-8:0:-8
+0:0:NaN
+abc:abc:NaN
+abc:1:abc:NaN
+1:abc:NaN
+0:0:NaN
+0:1:0
+1:0:1
+0:-1:0
+-1:0:-1
+1:1:0
+-1:-1:0
+1:-1:0
+-1:1:0
+1:2:1
+2:1:0
+1000000000:9:1
+2000000000:9:2
+3000000000:9:3
+4000000000:9:4
+5000000000:9:5
+6000000000:9:6
+7000000000:9:7
+8000000000:9:8
+9000000000:9:0
+35500000:113:33
+71000000:226:66
+106500000:339:99
+1000000000:3:1
+10:5:0
+100:4:0
+1000:8:0
+10000:16:0
+999999999999:9:0
+999999999999:99:0
+999999999999:999:0
+999999999999:9999:0
+999999999999999:99999:0
+-9:+5:1
++9:-5:-1
+-9:-5:-4
+-5:3:1
+-2:3:1
+4:3:1
+1:3:1
+-5:-3:-2
+-2:-3:-2
+4:-3:-2
+1:-3:-2
+4095:4095:0
+100041000510123:3:0
+152403346:12345:4321
+87654321:87654321:0
+# now some floating point tests
+123:2.5:0.5
+1230:2.5:0
+123.4:2.5:0.9
+123e1:25:5
+&ffac
+Nanfac:NaN
+-1:NaN
+0:1
+1:1
+2:2
+3:6
+4:24
+5:120
+6:720
+10:3628800
+11:39916800
+12:479001600
 &fsqrt
 +0:0
 -1:NaN
@@ -909,14 +1068,40 @@ $div_scale = 40
 nanfsqrt:NaN
 +inf:inf
 -inf:NaN
-+1:1
-+2:1.41421356237309504880168872420969807857
-+4:2
-+16:4
-+100:10
-+123.456:11.11107555549866648462149404118219234119
-+15241.38393:123.4559999756998444766131352122991626468
-+1.44:1.2
+1:1
+2:1.41421356237309504880168872420969807857
+4:2
+9:3
+16:4
+100:10
+123.456:11.11107555549866648462149404118219234119
+15241.38393:123.4559999756998444766131352122991626468
+1.44:1.2
+# sqrt(1.44) = 1.2, sqrt(e10) = e5 => 12e4
+1.44E10:120000
+2e10:141421.356237309504880168872420969807857
+144e20:120000000000
+# proved to be an endless loop under 7-9
+12:3.464101615137754587054892683011744733886
+&is_nan
+123:0
+abc:1
+NaN:1
+-123:0
+&is_inf
++inf::1
+-inf::1
+abc::0
+1::0
+NaN::0
+-1::0
++inf:-:0
++inf:+:1
+-inf:-:1
+-inf:+:0
+# it must be exactly /^[+-]inf$/
++infinity::0
+-infinity::0
 &is_odd
 abc:0
 0:0
@@ -1010,7 +1195,7 @@ NaNone:0
 1:1
 -1:0
 -2:0
-&bfloor
+&ffloor
 0:0
 abc:NaN
 +inf:inf
@@ -1019,7 +1204,7 @@ abc:NaN
 -51:-51
 -51.2:-52
 12.2:12
-&bceil
+&fceil
 0:0
 abc:NaN
 +inf:inf
