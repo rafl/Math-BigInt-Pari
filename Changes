@@ -1,0 +1,11 @@
+$Id: Changes,v 1.2 2001/07/14 22:18:23 btrott Exp $
+
+Revision history for Math::BigInt::Pari
+
+1.01  2001.07.14
+    - Incorporated Tels's changes per calling args to plugin methods
+      (now class is *always* the first arg, so no more checking).
+      Fixed some tests per Math::BigInt changes.
+
+1.00  2001.07.11
+    - Initial release.
