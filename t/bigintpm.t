@@ -8,16 +8,16 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 1414;
+  plan tests => 1439;
   }
-my $version = '1.39';	# for $VERSION tests, match current release (by hand!)
+my $version = '1.42';	# for $VERSION tests, match current release (by hand!)
 
 ##############################################################################
 # for testing inheritance of _swap
 
 package Math::Foo;
 
-use Math::BigInt lib => 'Pari';	# for testing
+use Math::BigInt lib => 'Pari';
 use vars qw/@ISA/;
 @ISA = (qw/Math::BigInt/);
 
@@ -44,7 +44,7 @@ sub _swap
 ##############################################################################
 package main;
 
-use Math::BigInt lib => 'Pari';	# for testing
+use Math::BigInt lib => 'Pari';
 
 my $CALC = Math::BigInt::_core_lib(); ok ($CALC,'Math::BigInt::Pari');
 
@@ -83,6 +83,10 @@ while (<DATA>)
       $try .= '$x->is_negative()+0;';
     } elsif ($f eq "is_positive") {
       $try .= '$x->is_positive()+0;';
+    } elsif ($f eq "as_hex") {
+      $try .= '$x->as_hex();';
+    } elsif ($f eq "as_bin") {
+      $try .= '$x->as_bin();';
     } elsif ($f eq "is_inf") {
       $try .= "\$x->is_inf('$args[1]')+0;";
     } elsif ($f eq "binf") {
@@ -110,13 +114,16 @@ while (<DATA>)
     }elsif ($f eq "bsqrt") {
       $try .= '$x->bsqrt();';
     }elsif ($f eq "length") {
-      $try .= "\$x->length();";
+      $try .= '$x->length();';
     }elsif ($f eq "exponent"){
+      # ->bstr() to see if a BigInt is returned
       $try .= '$x = $x->exponent()->bstr();';
     }elsif ($f eq "mantissa"){
+      # ->bstr() to see if a BigInt is returned
       $try .= '$x = $x->mantissa()->bstr();';
     }elsif ($f eq "parts"){
-      $try .= "(\$m,\$e) = \$x->parts();"; 
+      $try .= '($m,$e) = $x->parts();'; 
+      # ->bstr() to see if a BigInt is returned
       $try .= '$m = $m->bstr(); $m = "NaN" if !defined $m;';
       $try .= '$e = $e->bstr(); $e = "NaN" if !defined $e;';
       $try .= '"$m,$e";';
@@ -207,7 +214,7 @@ while (<DATA>)
   } # endwhile data tests
 close DATA;
 
-# XXX Tels 06/29/2001 following tests never fail or do not work :(
+# XXX Tels 06/29/2001 following tests never fail or do not work :( !?
 
 # test whether use Math::BigInt qw/version/ works
 $try = "use Math::BigInt ($version.'1');";
@@ -340,31 +347,6 @@ $ans = eval $try;
 print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
 
 ###############################################################################
-# check proper length of internal arrays
-
-$x = Math::BigInt->new(99999); is_valid($x);
-$x += 1; ok ($x,100000); is_valid($x); 
-$x -= 1; ok ($x,99999); is_valid($x); 
-
-###############################################################################
-# test bug in _digits with length($c[-1]) where $c[-1] was "00001" instead of 1
-
-$x = Math::BigInt->new(99998); $x++; $x++; $x++; $x++;
-if ($x > 100000) { ok (1,1) } else { ok ("$x < 100000","$x > 100000"); }
-
-$x = Math::BigInt->new(100003); $x++;
-$y = Math::BigInt->new(1000000);
-if ($x < 1000000) { ok (1,1) } else { ok ("$x > 1000000","$x < 1000000"); }
-
-###############################################################################
-# bug in sub where number with at least 6 trailing zeros after any op failed
-
-$x = Math::BigInt->new(123456); $z = Math::BigInt->new(10000); $z *= 10;
-$x -= $z;
-ok ($z, 100000);
-ok ($x, 23456);
-
-###############################################################################
 # bug with rest "-0" in div, causing further div()s to fail
 
 $x = Math::BigInt->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
@@ -439,6 +421,14 @@ ok ($x->length(),length "20988936657440586486151264256610222593863921");
 $x = Math::BigInt->new(2); $x **= 127; $x--;
 ok ($x,"170141183460469231731687303715884105727");
 
+$x = Math::BigInt->new('215960156869840440586892398248');
+($x,$y) = $x->length();
+ok ($x,30); ok ($y,0);
+
+$x = Math::BigInt->new('1_000_000_000_000');
+($x,$y) = $x->length();
+ok ($x,13); ok ($y,0);
+
 # I am afraid the following is not yet possible due to slowness
 # Also, testing for 2 meg output is a bit hard ;)
 #$x = new Math::BigInt(2); $x **= 6972593; $x--;
@@ -460,6 +450,13 @@ $x = Math::Foo->new(5);
 $x = 8 - $x;		# 5 - 8 instead of 8 - 5
 ok ($x,-3);
 ok (ref($x),'Math::Foo');
+
+###############################################################################
+# Test whether +inf eq inf
+# This tried to test whether BigInt inf equals Perl inf. Unfortunately, Perl
+# hasn't (before 5.7.3 at least) a consistent way to say inf, and some things
+# like 1e100000 crash on some platforms. So simple test for 'inf'
+$x = Math::BigInt->new('+inf'); ok ($x,'inf');
 
 ###############################################################################
 # all tests done
@@ -562,7 +559,7 @@ acmpNaN:acmpNaN:
 -inf:-123:1
 # return undef
 +inf:NaN:
-NaN:+inf:
+NaN:inf:
 -inf:NaN:
 NaN:-inf:
 &bnorm
@@ -591,6 +588,7 @@ NaN:-inf:
 0x1_2_3_4_56_78:305419896
 0x_123:NaN
 # inf input
+inf:inf
 +inf:inf
 -inf:-inf
 0inf:NaN
@@ -765,7 +763,7 @@ bcmpNaN:+0:
 -inf:+inf:-1
 # return undef
 +inf:NaN:
-NaN:+inf:
+NaN:inf:
 -inf:NaN:
 NaN:-inf:
 &binc
@@ -1090,6 +1088,7 @@ abc:0:NaN
 -7:4:-3
 -4:7:-5
 4:-7:-3
+-4:-7:5
 &bnot
 abc:NaN
 +0:-1
@@ -1127,6 +1126,8 @@ abc:NaN
 123:123
 -1:-1
 -2:-2
++inf:inf
+-inf:-inf
 &exponent
 abc:NaN
 1e4:4
@@ -1135,6 +1136,8 @@ abc:NaN
 -1:0
 -2:0
 0:1
++inf:inf
+-inf:inf
 &parts
 abc:NaN,NaN
 1e4:1,4
@@ -1143,6 +1146,8 @@ abc:NaN,NaN
 -1:-1,0
 -2:-2,0
 0:0,1
++inf:inf,inf
+-inf:-inf,inf
 &bpow
 abc:12:NaN
 12:abc:NaN
@@ -1201,6 +1206,7 @@ abc:12:NaN
 12345:5
 10000000000000000:17
 -123:3
+215960156869840440586892398248:30
 &bsqrt
 144:12
 16:4
@@ -1332,3 +1338,23 @@ NaNceil:NaN
 2:2
 3:3
 abc:NaN
+&as_hex
+128:0x80
+-128:-0x80
+0:0x0
+-0:0x0
+1:0x1
+0x123456789123456789:0x123456789123456789
++inf:inf
+-inf:-inf
+NaNas_hex:NaN
+&as_bin
+128:0b10000000
+-128:-0b10000000
+0:0b0
+-0:0b0
+1:0b1
+0b1010111101010101010110110110110110101:0b1010111101010101010110110110110110101
++inf:inf
+-inf:-inf
+NaNas_bin:NaN

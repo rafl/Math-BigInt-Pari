@@ -8,10 +8,10 @@ BEGIN
   $| = 1;
   unshift @INC, '../lib'; # for running manually
   # chdir 't' if -d 't';
-  plan tests => 1158;
+  plan tests => 1188;
   }
 
-use Math::BigInt lib => 'BitVect';
+use Math::BigInt lib => 'GMP';
 use Math::BigFloat;
 
 my ($x,$y,$f,@args,$ans,$try,$ans1,$ans1_str,$setup);
@@ -45,21 +45,31 @@ while (<DATA>)
     if ($f eq "fnorm")
       {
         $try .= "\$x;";
-      } elsif ($f eq "binf") {
-        $try .= "\$x->binf('$args[1]');";
-      } elsif ($f eq "bnan") {
-        $try .= "\$x->bnan();";
+      } elsif ($f eq "finf") {
+        $try .= "\$x->finf('$args[1]');";
+      } elsif ($f eq "fnan") {
+        $try .= "\$x->fnan();";
       } elsif ($f eq "numify") {
         $try .= "\$x->numify();";
-      } elsif ($f eq "bone") {
+      } elsif ($f eq "fone") {
         $try .= "\$x->bone('$args[1]');";
-      } elsif ($f eq "bstr") {
+      } elsif ($f eq "fstr") {
         $try .= "\$x->accuracy($args[1]); \$x->precision($args[2]);";
-        $try .= '$x->bstr();';
-      } elsif ($f eq "bsstr") {
-        $try .= '$x->bsstr();';
+        $try .= '$x->fstr();';
+      } elsif ($f eq "fsstr") {
+        $try .= '$x->fsstr();';
       } elsif ($f eq "parts") {
-        $try .= '($a,$b) = $x->parts(); "$a $b";';
+        # ->bstr() to see if a BigFloat is returned
+        $try .= '($a,$b) = $x->parts(); $a = $a->bstr(); $b = $b->bstr();';
+        $try .= '"$a $b";';
+      } elsif ($f eq "length") {
+        $try .= '$x->length();';
+      } elsif ($f eq "exponent") {
+        # ->bstr() to see if a BigFloat is returned
+        $try .= '$x->exponent()->bstr();';
+      } elsif ($f eq "mantissa") {
+        # ->bstr() to see if a BigFloat is returned
+        $try .= '$x->mantissa()->bstr();';
       } elsif ($f eq "fneg") {
         $try .= '$x->bneg();';
       } elsif ($f eq "bfloor") {
@@ -171,7 +181,7 @@ __END__
 -2:-2
 -123.456:-123
 -200:-200
-&binf
+&finf
 1:+:inf
 2:-:-inf
 3:abc:inf
@@ -182,12 +192,12 @@ __END__
 NaN:NaN
 +inf:inf
 -inf:-inf
-&bnan
+&fnan
 abc:NaN
 2:NaN
 -2:NaN
 0:NaN
-&bone
+&fone
 2:+:1
 -2:-:-1
 -2:+:1
@@ -196,15 +206,15 @@ abc:NaN
 -2::1
 abc::1
 2:abc:1
-&bsstr
+&fsstr
 +inf:inf
 -inf:-inf
-abcbsstr:NaN
+abcfsstr:NaN
 1234.567:1234567e-3
-&bstr
+&fstr
 +inf:::inf
 -inf:::-inf
-abcbsstr:::NaN
+abcfstr:::NaN
 1234.567:9::1234.56700
 1234.567::-6:1234.567000
 12345:5::12345
@@ -213,6 +223,7 @@ abcbsstr:::NaN
 0:4::0
 0::-4:0.0000
 &fnorm
+inf:inf
 +inf:inf
 -inf:-inf
 +infinity:NaN
@@ -538,11 +549,15 @@ fcmpNaN:+0:
 0.0005:0.0001:1
 0.005:0.0001:1
 0.001:0.0005:1
-0.000001:0.0005:-2	# <0, but can't test this
-0.00000123:0.0005:-2	# <0, but can't test this
+0.000001:0.0005:-1
+0.00000123:0.0005:-1
 0.00512:0.0001:1
 0.005:0.000112:1
 0.00123:0.0005:1
+1.5:2:-1
+2:1.5:1
+1.54321:234:-1
+234:1.54321:1
 # infinity
 -inf:5432112345:-1
 +inf:5432112345:1
@@ -558,7 +573,7 @@ fcmpNaN:+0:
 -inf:+inf:-1
 # return undef
 +inf:NaN:
-NaN:+inf:
+NaN:inf:
 -inf:NaN:
 NaN:-inf:
 &fdec
@@ -873,6 +888,33 @@ NaN:0
 123:123 0
 -123:-123 0
 -1200:-12 2
+NaNparts:NaN NaN
++inf:inf inf
+-inf:-inf inf
+&exponent
+0:1
+1:0
+123:0
+-123:0
+-1200:2
++inf:inf
+-inf:inf
+NaNexponent:NaN
+&mantissa
+0:0
+1:1
+123:123
+-123:-123
+-1200:-12
++inf:inf
+-inf:-inf
+NaNmantissa:NaN
+&length
+123:3
+-123:3
+0:1
+1:1
+12345678901234567890:20
 &is_zero
 NaNzero:0
 +inf:0

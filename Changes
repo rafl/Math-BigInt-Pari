@@ -1,8 +1,14 @@
-$Id: Changes,v 1.5 2001/08/06 06:33:01 btrott Exp $
+$Id: Changes,v 1.7 2001/09/03 19:07:42 btrott Exp $
 
 Revision history for Math::BigInt::Pari
 
-1.02  2001.07.22
+1.03  2001.09.02
+    - Incorporated Tels's changes: no longer need to EXPORT_OK functions;
+      added empty import method.
+    - Added _as_hex and _as_bin implementations for Math::Pari integers,
+      to support as_hex and as_bin Math::BigInt methods.
+
+1.02  2001.08.05
     - Added _gcd method; uses PARI library function to return gcd.
     - Incorporated Tels's changes: _copy() is now linear; _is_zero,
       _is_one, is_even, and is_odd now use PARI library functions

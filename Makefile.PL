@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.5 2001/08/06 06:33:01 btrott Exp $
+# $Id: Makefile.PL,v 1.6 2001/09/03 22:41:55 btrott Exp $
 
 use ExtUtils::MakeMaker qw( WriteMakefile );
 
@@ -9,8 +9,8 @@ WriteMakefile(
     AUTHOR => 'Benjamin Trott <ben@rhumba.pair.com>',
     ABSTRACT => 'Use Math::Pari for Math::BigInt routines',
     PREREQ_PM => {
-        'Math::BigInt' => '1.40',
-        'Math::BigFloat' => '1.20',
+        'Math::BigInt' => '1.42',
+        'Math::BigFloat' => '1.21',
         'Math::Pari' => '2.001804',
     },
 );

@@ -2,25 +2,12 @@ package Math::BigInt::Pari;
 use strict;
 
 use vars qw( @ISA @EXPORT $VERSION );
-$VERSION = '1.02';
-
-require Exporter;
-@ISA = qw(Exporter);
-
-@EXPORT = qw(
-        _add _mul _div _mod _sub
-        _new _from_hex
-        _str _num _acmp _len
-        _digit
-        _is_zero _is_one
-        _is_even _is_odd
-        _check _zero _one _copy _len
-        _pow _dec _inc
-        _and _or _xor
-        _gcd
-);
+$VERSION = '1.03';
 
 use Math::Pari qw( PARI pari2pv gdivent bittest gcmp0 gcmp1 gcd );
+
+# MBI will call this, so catch it and throw it away
+sub import { }
 
 sub _new { PARI(${ $_[1] }) }
 
@@ -29,6 +16,37 @@ sub _from_hex {
     $$h =~ s/^[+-]//;
     $$h = "0x$$h" unless $$h =~ /^0x/;
     Math::Pari::_hex_cvt("$$h");
+}
+
+sub _as_hex {
+    my $v = unpack('H*', _mp2os($_[1]));
+    $v =~ s!^0*!!;
+    \('0x' . $v);
+}
+sub _as_bin {
+    my $v = unpack('B*', _mp2os($_[1]));
+    $v =~ s!^0*!!;
+    \('0b' . $v);
+}
+
+sub _mp2os {
+    my($p) = @_;
+    $p = PARI($p);
+    my $base = PARI(1) << PARI(4*8);
+    my $res = '';
+    while ($p != 0) {
+        my $r = $p % $base;
+        $p = ($p-$r) / $base;
+        my $buf = pack 'V', $r;
+        if ($p == 0) {
+            $buf = $r >= 16777216 ? $buf :
+                   $r >= 65536 ? substr($buf, 0, 3) :
+                   $r >= 256   ? substr($buf, 0, 2) :
+                                 substr($buf, 0, 1);
+        } 
+        $res .= $buf;
+    }
+    scalar reverse $res;
 }
 
 sub _zero { PARI(0) }
