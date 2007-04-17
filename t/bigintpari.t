@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 101;
+  plan tests => 117;
   }
 
 # testing of Math::BigInt::Pari, primarily for interface/api and not for the
@@ -180,11 +180,27 @@ $x = $C->_new("7"); ok ($C->_str($C->_fac($x)),5040);
 $x = $C->_new("0"); ok ($C->_as_hex($x),'0x0');
 $x = $C->_new("1"); ok ($C->_as_hex($x),'0x1');
 $x = $C->_new("16"); ok ($C->_as_hex($x),'0x10');
+# _from_hex
+$x = $C->_from_hex("0x0"); ok ($C->_as_hex($x),'0x0');
+$x = $C->_from_hex("0x10"); ok ($C->_as_hex($x),'0x10');
 
 # _as_bin
 $x = $C->_new("0"); ok ($C->_as_bin($x),'0b0');
 $x = $C->_new("1"); ok ($C->_as_bin($x),'0b1');
 $x = $C->_new("16"); ok ($C->_as_bin($x),'0b10000');
+# _from_bin
+$x = $C->_from_bin("0b001"); ok ($C->_as_bin($x),'0b1');
+$x = $C->_from_bin("0b101"); ok ($C->_as_bin($x),'0b101');
+
+# _from_oct
+$x = $C->_from_oct("001"); ok ($C->_str($x),'1');
+$x = $C->_from_oct("07"); ok ($C->_str($x),'7');
+$x = $C->_from_oct("077"); ok ($C->_str($x),'63');
+$x = $C->_from_oct("07654321"); ok ($C->_str($x),'2054353');
+# _as_oct
+$x = $C->_new("2054353"); ok ($C->_as_oct($x),'07654321');
+$x = $C->_new("63"); ok ($C->_as_oct($x),'077');
+$x = $C->_new("0"); ok ($C->_as_oct($x),'00');
 
 # _modinv
 $x = $C->_new("8"); $y = $C->_new("5033");
@@ -198,6 +214,13 @@ ok ($C->_zeros($C->_new("10")), 1);
 ok ($C->_zeros($C->_new("109")), 0);
 ok ($C->_zeros($C->_new("108")), 0);
 ok ($C->_zeros($C->_new("100")), 2);
+
+# _1ex
+ok ($C->_str($C->_1ex(0)), $C->_new("1"));
+ok ($C->_str($C->_1ex(1)), $C->_new("10"));
+ok ($C->_str($C->_1ex(2)), $C->_new("100"));
+ok ($C->_str($C->_1ex(12)), $C->_new("1000000000000"));
+ok ($C->_str($C->_1ex(16)), $C->_new("10000000000000000"));
 
 # done
 

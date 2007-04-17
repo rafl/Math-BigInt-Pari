@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.42.
+signed via the Module::Signature module, version 0.54.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -12,27 +12,42 @@ the distribution may already have been compromised, and you should
 not run its Makefile.PL or Build.PL.
 
 -----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-SHA1 769fa4d514c3b1989cba0dc1d3ea8d2981e17c39 CHANGES
-SHA1 388908c86dbd5fe9c763e74c015e683ab062adc9 MANIFEST
-SHA1 c082d2b2c54ce3e129da489b9f7bb303b3a44620 META.yml
-SHA1 d1e0368be273f2a2f9f0dd0d20e3f056a37e7b22 Makefile.PL
+SHA1 6a9df1f638a775b2cc4a869f5f4f1ee3cc7d53a5 CHANGES
+SHA1 d6a6c30ee6d9ba6b9afab8bbf6a25e1b23c744e0 LICENSE
+SHA1 6e10368557409a5521c063763e2232a811a0bfdb MANIFEST
+SHA1 3716b684ad7f66e9f75a5cfa0737098b41dc0730 MANIFEST.SKIP
+SHA1 c9cb182ddf122af93ddf3e58900dfe161e362db1 META.yml
+SHA1 5cdd27ffc3bedae0de0248a603f1e208b5a5fd46 Makefile.PL
 SHA1 914ce56d39b58fcf8703b6e9895d980c44c796e5 NEW
 SHA1 99b736157d6c30930d844e192337598cbf924562 README
-SHA1 834bc6962757d6d036469c6c6127aa9ee0b6a1d7 lib/Math/BigInt/Pari.pm
-SHA1 f7a70b80cf54382eaae41f0e7a15394d68853eb9 t/bigfltpm.inc
-SHA1 d865f82019ee727d6753899a066dd605e7c9ed47 t/bigfltpm.t
-SHA1 8c8ff3317beaa3f8bc684b4ad71ec6ac8ad471aa t/bigintpari.t
-SHA1 631142ae4b92f7187bc526ccd7a83a8459582e65 t/bigintpm.inc
-SHA1 fd20f1ae03e05046b6f9674b847c7b76f21b34d2 t/bigintpm.t
+SHA1 ceac99579ef3914de1936417282842c07d907a6a inc/Module/Install.pm
+SHA1 6c9471c92c28e247fb84f4ab7dc277f68b33ea95 inc/Module/Install/Base.pm
+SHA1 b2cb1026330e8c4f8533c79569498ab15f189d86 inc/Module/Install/Can.pm
+SHA1 78acbad45c4289c228ead2278fc213ddd66bcead inc/Module/Install/Fetch.pm
+SHA1 642e5b27f4cbbbe440e5dc05c639f5fb79875fe3 inc/Module/Install/Makefile.pm
+SHA1 80d024f3eccf1c825b02b5e59de236b0af7d4bfc inc/Module/Install/Metadata.pm
+SHA1 fe6780ea5cfd67c79140699fbd4f0fe262255d57 inc/Module/Install/Win32.pm
+SHA1 51d43bffcfd7ffdecb8c8e9f97f3896c31b2e1b2 inc/Module/Install/WriteAll.pm
+SHA1 2324de0f370329d6c36904d424d1839116814ac4 lib/Math/BigInt/Pari.pm
+SHA1 b389295c7eb542fb89f55d37390a35ac582b5e6c t/bigfltpm.inc
+SHA1 0db3bb8e0107c4cce502e6eb1fa17952ab53f3ba t/bigfltpm.t
+SHA1 c1ba2070e47877670e758b807858acb8a0877da4 t/bigintpari.t
+SHA1 fb09f77aa5166f7ce2a0e189cb61b79ed6d969c6 t/bigintpm.inc
+SHA1 fa9972bdc414962a2828c1d76c0cab473b61f8ed t/bigintpm.t
+SHA1 0a2a28143f33ddf73e3fb1f533eda2419c3ec42e t/biglog.t
+SHA1 842bb9fb10c147cf1c0c0ae25b100aec7b769a7b t/bigroot.t
+SHA1 45aeb4622bb32bb26af7a0adbf2a32f8a3f2b0a5 t/pod.t
+SHA1 880339858f95cb588896be2551734c5ad25080d1 t/pod_cov.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.2.4 (GNU/Linux)
+Version: GnuPG v1.4.2 (GNU/Linux)
 
-iQEVAwUBQdgWb3cLPEOTuEwVAQGWvQf+LRZGwyZIidg8xxUJ+Kpi2F94w0r2x+mM
-31HMijrkSewtNaDfSkXurymnS+77gDixzs/eyA0YDtHqauSYjteO6IPixL7eTZHM
-gTIl7p5evLk5L8t/RQfYMcd+znSV/FVMEv282bRTuQ93LVYWAnCbP2iwxoP8cBTH
-otk+ozRkbD2W41rWxQj62chxw5efEJx62qqnKMlBosr02lrG5rs8HnTfZckcM1T8
-VVruFPRFzlYWRbaaZYyQ80IixYRVbDmWS8BKrIVBZ2D4pmLDdEecjeLy5C5utKZW
-q61u9WoOz7ahri1WKRVCPPjr3xtAFtqFPC4WcORFLt8hoG9BK+RVkA==
-=rUCt
+iQEVAwUBRiTe8ncLPEOTuEwVAQKKKwf6A/nwbNwhYjkY5txixGfwmQd2i+t20xv8
+iTj5ZUAKhGY5NzdoXRO3ubURsgq+NXnnZDVgHG9CAGVxBiqbTVz1Np8Bw1SY/BZl
+kNsAhESvFcX3WSPV2L5UyIALVr7Fjn+7M1DiOAiGrqLTDdrt0dasei8ZCDZt/pgj
+/HmYPtTICtxPWDX2JE8OrkFmSG7GUpvEuc4Iwnn8y2t0TrIVKsDIb132KMKn2lmE
+wrgwcUZnMVLLO2gAcjPoDjFJObqk5cQvXhyx74WahbiotuwJacRAO1AXXztWo9Ff
+juE4TDoyQQMOZJk/vxCo8qdlvmoH6vONQMan0iyUkCeJKNMwJ5PpuA==
+=FDkB
 -----END PGP SIGNATURE-----

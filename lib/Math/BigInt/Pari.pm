@@ -1,6 +1,6 @@
 package Math::BigInt::Pari;
 
-$VERSION = '1.11';
+$VERSION = '1.12';
 
 use strict;
 
@@ -9,7 +9,7 @@ use Math::Pari
 
 # MBI will call this, so catch it and throw it away
 sub import { }
-sub api_version() { 1; }        # we are compatible with MBI v1.70 and up
+sub api_version() { 2; }        # we are compatible with MBI v1.83 and up
 
 my $zero = PARI(0);	# for _copy
 my $one = PARI(1);	# for _inc and _dec
@@ -23,66 +23,93 @@ BEGIN
   }
 
 sub _new {
- # the . '' is because new($2) will give a magical scalar to us, and PARI
- # does not like this at all
- # use Devel::Peek; print Dump($_[1]); 
- PARI($_[1] . '')
- }
+  # the . '' is because new($2) will give a magical scalar to us, and PARI
+  # does not like this at all :/
+  # use Devel::Peek; print Dump($_[1]); 
+  PARI($_[1] . '')
+  }
 
 sub _from_hex {
-    my $h = $_[1];
-    $h =~ s/^[+-]//;				# remove sign
-    $h = "0x$h" unless $h =~ /^0x/;		# make sure it starts with 0x
-    Math::Pari::_hex_cvt($h);
-}
+  Math::Pari::_hex_cvt($_[1]);
+  }
 
 sub _from_bin
   {
   my $b = $_[1];
-  $b =~ s/^[+-]?0b//;					# remove sign and 0b
-  my $l = length($b);					# bits
+  $b =~ s/^0b//;					# remove leading 0b
+  my $l = length($b);					# in bits
   $b = '0' x (8-($l % 8)) . $b if ($l % 8) != 0;	# padd left side w/ 0
   my $h = unpack('H*', pack ('B*', $b));		# repack as hex
-  Math::Pari::_hex_cvt('0x' . $h);			# can handle it now
+  Math::Pari::_hex_cvt('0x' . $h);			# Pari can handle it now
+  }
+
+sub _from_oct
+  {
+  Math::Pari::_hex_cvt('0' . $_[1]);
   }
 
 sub _as_hex {
-    my $v = unpack('H*', _mp2os($_[1]));
-    return "0x0" if $v eq '';
-    $v =~ s/^0*/0x/;
-    $v;
-}
+  my $v = unpack('H*', _mp2os($_[1]));
+  return "0x0" if $v eq '';
+  $v =~ s/^0*/0x/;
+  $v;
+  }
+
 sub _as_bin {
-    my $v = unpack('B*', _mp2os($_[1]));
-    return "0b0" if $v eq '';
-    $v =~ s/^0*/0b/;
-    $v;
-}
+  my $v = unpack('B*', _mp2os($_[1]));
+  return "0b0" if $v eq '';
+  $v =~ s/^0*/0b/;
+  $v;
+  }
+
+sub _as_oct {
+  my $v = _mp2oct($_[1]);
+  return "00" if $v eq '';
+  $v =~ s/^0*/0/;
+  $v;
+  }
 
 sub _mp2os {
-    my($p) = @_;
-    $p = PARI($p);
-    my $base = PARI(1) << PARI(4*8);
-    my $res = '';
-    while ($p != 0) {
-        my $r = $p % $base;
-        $p = ($p-$r) / $base;
-        my $buf = pack 'V', $r;
-        if ($p == 0) {
-            $buf = $r >= 16777216 ? $buf :
-                   $r >= 65536 ? substr($buf, 0, 3) :
-                   $r >= 256   ? substr($buf, 0, 2) :
-                                 substr($buf, 0, 1);
-        } 
-        $res .= $buf;
+  my($p) = @_;
+  $p = PARI($p);
+  my $base = PARI(1) << PARI(4*8);
+  my $res = '';
+  while ($p != 0)
+    {
+    my $r = $p % $base;
+    $p = ($p-$r) / $base;
+    my $buf = pack 'V', $r;
+    if ($p == 0) {
+         $buf = $r >= 16777216 ? $buf :
+                $r >= 65536 ? substr($buf, 0, 3) :
+                $r >= 256   ? substr($buf, 0, 2) :
+                              substr($buf, 0, 1);
+      } 
+    $res .= $buf;
     }
-    scalar reverse $res;
-}
+  scalar reverse $res;
+  }
+
+sub _mp2oct {
+  my($p) = @_;
+  $p = PARI($p);
+  my $base = PARI(8);
+  my $res = '';
+  while ($p != 0)
+    {
+    my $r = $p % $base;
+    $p = ($p-$r) / $base;
+    $res .= $r;
+    }
+  scalar reverse $res;
+  }
 
 sub _zero { PARI(0) }
 sub _one  { PARI(1) }
 sub _two  { PARI(2) }
 sub _ten  { PARI(10) }
+
+sub _1ex  { gpui(PARI(10), $_[1]) }
 
 sub _copy { $_[1] + $zero; }
 
@@ -131,6 +158,9 @@ sub _gcd { gcd($_[1], $_[2]) }
 
 sub _len { length(pari2pv($_[1])) }	# costly!
 
+# XXX TODO: calc len in base 2 then appr. in base 10
+sub _alen { length(pari2pv($_[1])) }
+
 sub _zeros 
   {
   return 0 if gcmp0($_[1]);		# 0 has no trailing zeros
@@ -172,85 +202,32 @@ sub _is_even { bittest($_[1],0) ? 0 : 1 }
 
 sub _is_odd { bittest($_[1],0) ? 1 : 0 }
 
-sub _acmp { gcmp($_[1],$_[2]) }
+sub _acmp { 
+ my $i = gcmp($_[1],$_[2]) || 0; 
+ # work around bug in Pari (on 64bit systems?)
+ $i = -1 if $i == 4294967295;
+ $i;
+ }
 
 sub _check {
-    my($class,$x) = @_;
-    return "$x is not a reference to Math::Pari" if ref($x) ne 'Math::Pari';
-    0;
-}
+  my($class,$x) = @_;
+  return "$x is not a reference to Math::Pari" if ref($x) ne 'Math::Pari';
+  0;
+  }
 
 sub _sqrt
   {
-  # square root (that could be surely faster. Maybe even a native version)
-  # "int(sqrt($_[1]))" does unfortunately not work...
-
-  _root($_[0], $_[1], 2);
-
+  # square root of $x
+  $_[1] = Math::Pari::sqrtint($_[1]);
   }
 
 sub _root
   {
   # n'th root
-  # That could be surely faster. Maybe even a native version).
   my ($c,$x,$n) = @_;
 
-  # trial computation by starting with 2,4,8,16 etc until we overstep
-  my $step;
-  my $trial = _two($c);
-
-  my $two = _two($c);
-  my $hundred = _new($c, "128");
-
-  # while still to do more than X steps
-  do
-    {
-    $step = _two();
-    while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0)
-      {
-      _mul ($c, $step, $two);
-      _add ($c, $trial, $step);
-      }
-
-    # hit exactly?
-    if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) == 0)
-      {
-      $x = _copy($c,$trial);		# make copy while preserving ref to $x
-      return $x;
-      }
-
-    # overstepped, so go back on step
-    _sub($c, $trial, $step);
-    } while ( _acmp($c, $step, $hundred) > 0);
-
-  # reset step to 2
-  $step = _two();
-
-  # add two, because $trial cannot be exactly the result (otherwise we would
-  # alrady have found it)
-  _add($c, $trial, $step);
-
-  # and now add more and more (2,4,6,8,10 etc)
-  while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0)
-    {
-    _add ($c, $trial, $step);
-    }
-
-  # hit not exactly? (overstepped)
-  if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) > 0)
-    {
-    _dec($c,$trial);
-    }
-
-  # hit not exactly? (overstepped)
-  # 80 too small, 81 slightly too big, 82 too big
-  if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) > 0)
-    {
-    _dec ($c, $trial);
-    }
-
-  $x = _copy($c,$trial);		# make copy while preserving ref to $x
-  $x;
+  # Native version:
+  return $_[1] = int(Math::Pari::sqrtn($_[1] + 0.5, $_[2]));
   }
 
 sub _modpow
@@ -405,7 +382,7 @@ __END__
 
 =head1 NAME
 
-Math::BigInt::Pari - Use Math::Pari for Math::BigInt routines 
+Math::BigInt::Pari - Use Math::Pari for Math::BigInt routines
 
 =head1 SYNOPSIS
 
@@ -426,7 +403,7 @@ under the same terms as Perl itself.
 =head1 AUTHOR
 
 Original Math::BigInt::Pari written by Benjamin Trott 2001, ben@rhumba.pair.com.
-Extended and maintained by Tels 2001-2004 http://bloodgate.com
+Extended and maintained by Tels 2001-2007 http://bloodgate.com
 
 Math::Pari was written by Ilya Zakharevich.
 

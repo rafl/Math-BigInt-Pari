@@ -1,42 +1,25 @@
-use ExtUtils::MakeMaker qw( WriteMakefile );
 
-sub MY::metafile {
-  package MY;
-  my $self = shift;
-  if (!eval { require YAML; 1 })
-  {
-    warn ("YAML not installed, cannot override metafile"); return $self->SUPER::metafile_target(@_);
-  };
+use strict;
 
-  my $node = new YAML::Node {};
+# Load the Module::Install bundled in ./inc/
+use inc::Module::Install;
 
-  $node->{name}                 = $self->{DISTNAME};
-  $node->{version}              = $self->{VERSION};
-  $node->{version_from}         = $self->{VERSION_FROM};
-  $node->{license}              = 'perl';
-  $node->{distribution_type}    = 'module';
-  $node->{generated_by}         = "$self->{DISTNAME} version $self->{VERSION}";
-  $node->{installdirs}          = 'site';
-  $node->{requires}             = $self->{PREREQ_PM};
+# The name of your distribution
+name		'Math-BigInt-Pari';
 
-  my $dump = YAML::Dump( $node );
+# Get most of the details from the primary module
+all_from	'lib/Math/BigInt/Pari.pm';
 
-  $dump =~ s/^(.*)$/\t\$(NOECHO) \$(ECHO) "$1" >>META.yml/gm;
-  $dump =~ s/>>META\.yml/>META.yml/;
+requires	'perl'		=> "5.006002";
+requires	'Math::BigInt'	=> '1.83';
+requires	'Math::Pari'	=> '2.010709';
 
-  return "metafile:\n$dump";
-}
+build_requires	'Test::More'	=> 0.47;
 
-WriteMakefile(
-    NAME		=> 'Math::BigInt::Pari',
-    DISTNAME		=> 'Math-BigInt-Pari',
-    VERSION_FROM	=> 'lib/Math/BigInt/Pari.pm',
-    AUTHOR		=> 
-      'Benjamin Trott <ben@rhumba.pair.com>, Tels <http://bloodgate.com>',
-    ABSTRACT		=> 'Use Math::Pari for Math::BigInt routines',
-    PREREQ_PM		=> {
-        'Math::BigInt' => '1.74',
-        'Math::BigFloat' => '1.48',
-        'Math::Pari' => '2.010602',
-    },
-);
+license		'perl';
+      
+author		'Benjamin Trott <ben@rhumba.pair.com>, ' .
+		'Tels <http://bloodgate.com>';
+
+# Generate the Makefile
+WriteAll;

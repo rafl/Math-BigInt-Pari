@@ -110,7 +110,7 @@ while (<DATA>)
         $try .= ", \$z" if (defined $args[2]);
         $try .= " );";
       } elsif ($f eq "fcmp") {
-        $try .= '$x <=> $y;';
+        $try .= '$x->fcmp($y);';
       } elsif ($f eq "facmp") {
         $try .= '$x->facmp($y);';
       } elsif ($f eq "fpow") {
@@ -164,8 +164,7 @@ while (<DATA>)
 	  # float numbers are normalized (for now), so mantissa shouldn't have
 	  # trailing zeros
 	  #print $ans1->_trailing_zeros(),"\n";
-          use Data::Dumper;
-          print "# $ans1 ($CL $ans1->{_m}) has trailing zeros after '$try'\n", Dumper($ans1),
+          print "# Has trailing zeros after '$try'\n"
 	   if !ok ($CL->_zeros( $ans1->{_m}), 0);
 	  }
         }
@@ -765,6 +764,22 @@ $round_mode = "even"
 -601234500:6:-601234000
 +60123456789.0123:5:60123000000
 -60123456789.0123:5:-60123000000
+$round_mode = "common"
++60123456789:5:60123000000
+-60123456789:5:-60123000000
++60123456789:6:60123500000
+-60123456789:6:-60123500000
++60123456789:9:60123456800
+-60123456789:9:-60123456800
++601234500:6:601235000
+-601234500:6:-601235000
++601234400:6:601234000
+-601234400:6:-601234000
++601234600:6:601235000
+-601234600:6:-601235000
++601234300:6:601234000
++60123456789.0123:5:60123000000
+-60123456789.0123:5:-60123000000
 &ffround
 $round_mode = "trunc"
 +inf:5:inf
@@ -1222,6 +1237,11 @@ NaNmul:-inf:NaN
 0:1:0,0
 9:4:2.25,1
 9:5:1.8,4
+# bug in v1.74 with bdiv in list context, when $y is 1 or -1
+2.1:-1:-2.1,0
+2.1:1:2.1,0
+-2.1:-1:2.1,0
+-2.1:1:-2.1,0
 &fdiv
 $div_scale = 40; $round_mode = 'even'
 abc:abc:NaN
@@ -1383,6 +1403,14 @@ abc:1:abc:NaN
 1230:2.5:0
 123.4:2.5:0.9
 123e1:25:5
+-2.1:1:0.9
+2.1:1:0.1
+-2.1:-1:-0.1
+2.1:-1:-0.9
+-3:1:0
+3:1:0
+-3:-1:0
+3:-1:0
 &ffac
 Nanfac:NaN
 -1:NaN

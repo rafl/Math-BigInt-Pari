@@ -1,13 +1,27 @@
 CHANGES
+inc/Module/Install.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/Metadata.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
+lib/Math/BigInt/Pari.pm
+LICENSE
+Makefile.PL
 MANIFEST
+MANIFEST.SKIP
+META.yml			Module meta-data (added by MakeMaker)
 NEW
 README
 SIGNATURE
-Makefile.PL
-lib/Math/BigInt/Pari.pm
 t/bigfltpm.inc
 t/bigfltpm.t
 t/bigintpari.t
 t/bigintpm.inc
 t/bigintpm.t
-META.yml                                 Module meta-data (added by MakeMaker)
+t/biglog.t
+t/bigroot.t
+t/pod.t
+t/pod_cov.t

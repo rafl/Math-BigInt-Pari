@@ -1,5 +1,13 @@
 Revision history for Math::BigInt::Pari
 
+2007-04-17 v1.12 Tels 5258 tests
+ * require Math::BigInt v1.83, Math::BigRat v0.19, Math::Pari v2.010709
+ * use native sqrtint() for _sqrt(), making it faster
+ * use native sqrtn() for _root(), making it faster
+ * support api_version() 2: add:
+   + _from_oct(), _as_oct()
+   + _10ex(), _alen()
+
 2005-01-02 v1.11 Tels 5055 tests
  * require Math::BigInt v1.74 and Math::Pari v2.010602
  * testsuite from MBI v1.74
