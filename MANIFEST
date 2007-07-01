@@ -13,7 +13,6 @@ Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 META.yml			Module meta-data (added by MakeMaker)
-NEW
 README
 SIGNATURE
 t/bigfltpm.inc

@@ -1,7 +1,51 @@
 Revision history for Math::BigInt::Pari
 
+2007-07-01 v1.13 Tels 5704 tests
+ * require Math::BigInt v1.87
+ * testsuite from MBI v1.87
+ * _log_int() calculates a guess, and then use this to find the real result,
+   this makes it almost independent from the results size and much faster:
+
+   Using Math::BigInt v1.87 and Math::BigInt::Pari v1.12
+
+  00 len 2:     3s (3.11 usr + 0.00 sys = 3.11 CPU) @  4714/s (n=14661)
+  01 len 2 big: 3s (3.00 usr + 0.01 sys = 3.01 CPU) @   532/s (n=1604)
+  02 len 3:     3s (3.19 usr + 0.01 sys = 3.20 CPU) @   728/s (n=2332)
+  03 len 7:     3s (3.01 usr + 0.16 sys = 3.17 CPU) @  1960/s (n=6216)
+  04 len 8:     3s (3.21 usr + 0.00 sys = 3.21 CPU) @  2247/s (n=7215)
+  05 len 11:    3s (3.18 usr + 0.00 sys = 3.18 CPU) @  2862/s (n=9104)
+  06 len 14:    3s (3.23 usr + 0.00 sys = 3.23 CPU) @  3620/s (n=11695)
+  06 len 20:    3s (3.25 usr + 0.00 sys = 3.25 CPU) @  4882/s (n=15868)
+  0a len 3 big: 3s (3.16 usr + 0.00 sys = 3.16 CPU) @   168/s (n=534)
+
+   Using Math::BigInt v1.87 and Math::BigInt::Pari v1.13
+
+  00 len 2:     2s (3.24 usr + 0.00 sys = 3.24 CPU) @ 13064/s (n=42328)
+  01 len 2 big: 3s (3.17 usr + 0.00 sys = 3.17 CPU) @  4853/s (n=15387)
+  02 len 3:     3s (3.23 usr + 0.00 sys = 3.23 CPU) @  4831/s (n=15607)
+  03 len 7:     3s (3.24 usr + 0.00 sys = 3.24 CPU) @  4813/s (n=15597)
+  04 len 8:     3s (3.22 usr + 0.00 sys = 3.22 CPU) @  4778/s (n=15387)
+  05 len 11:    3s (3.02 usr + 0.16 sys = 3.18 CPU) @  4754/s (n=15119)
+  06 len 14:    3s (3.15 usr + 0.00 sys = 3.15 CPU) @  4740/s (n=14934)
+  06 len 20:    3s (3.24 usr + 0.00 sys = 3.24 CPU) @  4749/s (n=15387)
+  0a len 3 big: 3s (3.22 usr + 0.00 sys = 3.22 CPU) @   877/s (n=2825)
+
+  For reference:
+
+   Using Math::BigInt v1.87 and Math::BigInt::GMP 1.22
+
+  00 len 2:     3s (3.14 usr + 0.00 sys = 3.14 CPU) @ 16853/s (n=52920)
+  01 len 2 big: 3s (3.13 usr + 0.00 sys = 3.13 CPU) @ 16391/s (n=51306)
+  02 len 3:     3s (3.17 usr + 0.03 sys = 3.20 CPU) @ 16036/s (n=51316)
+  03 len 7:     3s (2.97 usr + 0.13 sys = 3.10 CPU) @ 16063/s (n=49797)
+  04 len 8:     3s (3.10 usr + 0.01 sys = 3.11 CPU) @ 16011/s (n=49797)
+  05 len 11:    3s (3.14 usr + 0.00 sys = 3.14 CPU) @ 15858/s (n=49797)
+  06 len 14:    3s (3.14 usr + 0.01 sys = 3.15 CPU) @ 15808/s (n=49797)
+  06 len 20:    3s (3.15 usr + 0.01 sys = 3.16 CPU) @ 15761/s (n=49807)
+  0a len 3 big: 4s (3.20 usr + 0.04 sys = 3.24 CPU) @ 15838/s (n=51316)
+
 2007-04-17 v1.12 Tels 5258 tests
- * require Math::BigInt v1.83, Math::BigRat v0.19, Math::Pari v2.010709
+ * require Math::BigInt v1.83, Math::Pari v2.010709
  * use native sqrtint() for _sqrt(), making it faster
  * use native sqrtn() for _root(), making it faster
  * support api_version() 2: add:

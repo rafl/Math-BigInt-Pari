@@ -1,8 +1,8 @@
 --- 
 abstract: Use Math::Pari for Math::BigInt routines
-author: Benjamin Trott <ben@rhumba.pair.com>, Tels <http://bloodgate.com>
+author: Benjamin Trott <ben@rhumba.pair.com>, Tels <nospam-abuse@bloodgate.com>
 build_requires: 
-  Test::More: 0.47
+  Test::More: 0.62
 distribution_type: module
 generated_by: Module::Install version 0.65
 license: perl
@@ -15,7 +15,7 @@ no_index:
     - inc
     - t
 requires: 
-  Math::BigInt: 1.83
+  Math::BigInt: 1.87
   Math::Pari: 2.010709
   perl: 5.6.2
-version: 1.12
+version: 1.13

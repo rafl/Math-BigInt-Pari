@@ -1,6 +1,6 @@
 package Math::BigInt::Pari;
 
-$VERSION = '1.12';
+$VERSION = '1.13';
 
 use strict;
 
@@ -330,28 +330,50 @@ sub _log_int
 
   # X == 0 => NaN
   return if _is_zero($c,$x);
+
+  $base = _new($c,2) unless defined $base;
+  $base = _new($c,$base) unless ref $base;
+
   # BASE 0 or 1 => NaN
   return if _is_zero($c,$base) || _is_one($c,$base);
 
-  my $cmp = _acmp($c,$x,$base);         # X == BASE => 1
+  my $cmp = _acmp($c,$x,$base); 	# X == BASE => 1
   if ($cmp == 0)
     {
     # return one
-    $x = _one($c);
-    return ($x, 1);
+    return (_one($c), 1);
     }
   # X < BASE
   if ($cmp < 0)
     {
-    $x = _zero($c);
-    return ($x,undef);
+    return (_zero($c),undef);
     }
 
-  my $trial = _copy($c,$base);
-  my $x_org = _copy($c,$x);
-  $x = _one($c);
+  # Compute a guess for the result based on:
+  # $guess = int ( length_in_base_10(X) / ( log(base) / log(10) ) )
+  my $len = _alen($c,$x);
+  my $log = log( _num($c,$base) ) / log(10);
 
-  my $a;
+  # calculate now a guess based on the values obtained above:
+  my $x_org = _copy($c,$x);
+
+  # unfortunately, cannot keep the reference to $x with PARI:
+  $x = _new($c,int($len / $log) - 1);
+
+  my $trial = _pow ($c, _copy($c, $base), $x);
+  my $a = _acmp($c,$trial,$x_org);
+
+  if ($a == 0)
+    {
+    return ($x,1);
+    }
+  elsif ($a > 0)
+    {
+    # too big, shouldn't happen
+    _div($c,$trial,$base); _dec($c, $x);
+    }
+
+  # find the real result by going forward:
   my $base_mul = _mul($c, _copy($c,$base), $base);
   my $two = _two($c);
 
@@ -392,8 +414,8 @@ Math::BigInt::Pari - Use Math::Pari for Math::BigInt routines
 
 =head1 DESCRIPTION
 
-Provides support for big integer calculations via means of Math::Pari,
-an XS layer on top of the very fast PARI library.
+Provides support for big integer in BigInt et al. calculations via means of
+Math::Pari, an XS layer on top of the very fast PARI library.
 
 =head1 LICENSE
  
@@ -402,10 +424,10 @@ under the same terms as Perl itself.
 
 =head1 AUTHOR
 
-Original Math::BigInt::Pari written by Benjamin Trott 2001, ben@rhumba.pair.com.
-Extended and maintained by Tels 2001-2007 http://bloodgate.com
+Original Math::BigInt::Pari written by Benjamin Trott 2001, L<ben@rhumba.pair.com>.
+Extended and maintained by Tels 2001-2007 L<http://bloodgate.com>
 
-Math::Pari was written by Ilya Zakharevich.
+L<Math::Pari> was written by Ilya Zakharevich.
 
 =head1 SEE ALSO
 
