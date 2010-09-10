@@ -6,3 +6,4 @@
 ^Makefile.(old|bak)\z
 .*\.patch\z
 pm_to_blib
+\.git
