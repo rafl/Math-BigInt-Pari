@@ -17,9 +17,11 @@ requires	'Math::Pari'	=> '2.010709';
 build_requires	'Test::More'	=> 0.62;
 
 license		'perl';
-      
+
 author		'Benjamin Trott <ben@rhumba.pair.com>, ' .
 		'Tels <nospam-abuse@bloodgate.com>';
+
+sign;
 
 # Generate the Makefile
 WriteAll;
