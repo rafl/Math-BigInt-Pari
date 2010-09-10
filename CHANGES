@@ -1,5 +1,8 @@
 Revision history for Math::BigInt::Pari
 
+2010-09-10 v1.14 rafl 5716 tests
+ * Fix tests with Math::BigInt >= 1.90 and depend on it.
+
 2007-07-01 v1.13 Tels 5704 tests
  * require Math::BigInt v1.87
  * testsuite from MBI v1.87
