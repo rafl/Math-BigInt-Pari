@@ -11,7 +11,7 @@ name		'Math-BigInt-Pari';
 all_from	'lib/Math/BigInt/Pari.pm';
 
 requires	'perl'		=> "5.006002";
-requires	'Math::BigInt'	=> '1.87';
+requires	'Math::BigInt'	=> '1.90';
 requires	'Math::Pari'	=> '2.010709';
 
 build_requires	'Test::More'	=> 0.62;
